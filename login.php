@@ -138,13 +138,13 @@ include "koneksi.php";
 <?php
 if ($_POST) { //login user
   extract($_POST);
-  $username = mysqli_real_escape_string($con,$_POST['username']);
-  $password = mysqli_real_escape_string($con,$_POST['password']);
-  $sql = mysqli_query($con,"SELECT * FROM tbl_user WHERE nama='$username' AND password='$password' LIMIT 1");
-  if (mysqli_num_rows($sql) > 0) {
+  $username = $_POST['username'];
+  $password = $_POST['password'];
+  $sql = sqlsrv_query($con,"SELECT TOP 1 * FROM db_ikg.tbl_user WHERE nama='$username' AND password='$password'",array(),array("Scrollable"=>SQLSRV_CURSOR_KEYSET));
+  if (sqlsrv_num_rows($sql) > 0) {
     $_SESSION['usridGkg'] = $username;
     $_SESSION['pasidGkg'] = $password;
-    $r = mysqli_fetch_array($sql);
+    $r = sqlsrv_fetch_array($sql);
     $_SESSION['id_user'] = $r['id_user'];
     $_SESSION['lvl_idGkg'] = $r['level'];
     $_SESSION['statusGkg'] = $r['status'];

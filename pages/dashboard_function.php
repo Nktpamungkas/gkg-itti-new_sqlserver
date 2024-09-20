@@ -4,11 +4,11 @@ function Get_roll_bydate($day, $group)
     ini_set("error_reporting", 1);
     session_start();
     include "koneksi.php";
-    $sql_sum_roll = mysqli_query($con,"SELECT sum(rol) as rolf 
-    from tbl_schedule 
-    where status = 'selesai' and DATE_FORMAT(tgl_mulai,'%Y-%m-%d') = '$day' and g_shift = '$group'
+    $sql_sum_roll = sqlsrv_query($con,"SELECT sum(rol) as rolf 
+    from db_ikg.tbl_schedule 
+    where [status] = 'selesai' and CAST(tgl_mulai as DATE) = '$day' and g_shift = '$group'
     group by g_shift");
-    $sum_roll_day = mysqli_fetch_array($sql_sum_roll);
+    $sum_roll_day = sqlsrv_fetch_array($sql_sum_roll);
 
     if (empty($sum_roll_day['rolf'])) {
         return 0;

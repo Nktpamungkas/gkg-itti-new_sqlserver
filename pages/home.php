@@ -3,6 +3,7 @@ ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
 include "dashboard_function.php";
+include "utils/helper.php";
 ?>
 
 <!DOCTYPE html>
@@ -72,16 +73,16 @@ $eleven_2dayago = date('Y-m-d', strtotime("-2 days")) . ' 07:00';
 $eleven_ystrdy = date('Y-m-d', strtotime("-1 days")) . ' 07:00';
 $eleven_today = date('Y-m-d') . ' 07:00';
 
-$todayQty = mysqli_query($con,"SELECT sum(bruto) as sumqty from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_ystrdy' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_today'");
-$TodayRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_ystrdy' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_today'");
-$YstrdyQty = mysqli_query($con,"SELECT sum(bruto) as sumqty from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_2dayago' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_ystrdy'");
-$YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_2dayago' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_ystrdy'");
+$todayQty = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update as DATETIME) <= '$eleven_today'");
+$TodayRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update as DATETIME) <= '$eleven_today'");
+$YstrdyQty = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_2dayago' AND CAST(tgl_update as DATETIME) <= '$eleven_ystrdy'");
+$YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_2dayago' AND CAST(tgl_update as DATETIME) <= '$eleven_ystrdy'");
 ?>
 
 <body>
     <div class="row">
-        <?php $sql_ann = mysqli_query($con,"SELECT * from announcement where id = 1");
-        $ann = mysqli_fetch_array($sql_ann); ?>
+        <?php $sql_ann = sqlsrv_query($con,"SELECT * from db_ikg.announcement where id = 1");
+        $ann = sqlsrv_fetch_array($sql_ann); ?>
         <?php if ($ann['is_active'] == 1) : ?>
             <div class="alert" role="alert" style="background-color: #214d66;">
                 <marquee style="color: white; font-style: italic; font-weight: bold;">
@@ -96,7 +97,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
             <div class="small-box bg-aqua">
                 <div class="inner">
                     <h3><?php
-                        $Qtytoday = mysqli_fetch_array($todayQty);
+                        $Qtytoday = sqlsrv_fetch_array($todayQty);
                         echo number_format($Qtytoday['sumqty'], 2, ',', '.');
                         ?> Kg</h3>
                     <p>TOTAL BERAT PRODUKSI HARI INI</p>
@@ -115,7 +116,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
             <div class="small-box bg-green">
                 <div class="inner">
                     <h3><?php
-                        $RollToday = mysqli_fetch_array($TodayRoll);
+                        $RollToday = sqlsrv_fetch_array($TodayRoll);
                         echo number_format($RollToday['sumrol'], 0, ',', '.');
                         ?> Rol</h3>
 
@@ -135,7 +136,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
             <div class="small-box bg-yellow">
                 <div class="inner">
                     <h3><?php
-                        $QtyYstrdy = mysqli_fetch_array($YstrdyQty);
+                        $QtyYstrdy = sqlsrv_fetch_array($YstrdyQty);
                         echo number_format($QtyYstrdy['sumqty'], 2, ',', '.');
                         ?> Kg</h3>
 
@@ -155,7 +156,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
             <div class="small-box bg-red">
                 <div class="inner">
                     <h3><?php
-                        $RollYstrdy = mysqli_fetch_array($YstrdyRoll);
+                        $RollYstrdy = sqlsrv_fetch_array($YstrdyRoll);
                         echo number_format($RollYstrdy['sumrol'], 0, ',', '.');
                         ?> Rol</h3>
                     <p>TOTAL ROLL SELESAI KEMARIN</p>
@@ -177,8 +178,8 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                 <div class="info-box-content">
                     <span class="info-box-text"><?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?><br /><?php echo  date('d-F-Y') . ' 07:00'; ?></span>
                     <span class="info-box-number">
-                        <?php $sql_a = mysqli_query($con,"SELECT sum(bruto) as sumqty from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_ystrdy' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_today' and g_shift = 'A'");
-                        $rslt_a = mysqli_fetch_array($sql_a);
+                        <?php $sql_a = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'A'");
+                        $rslt_a = sqlsrv_fetch_array($sql_a);
                         ?>
                         <h4 style="font-weight: bold;"><?php echo number_format($rslt_a['sumqty'], 2, ',', '.') ?> KG</h4>
                     </span>
@@ -195,8 +196,8 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                 <div class="info-box-content">
                     <span class="info-box-text"><?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?><br /><?php echo  date('d-F-Y') . ' 07:00'; ?></span>
                     <span class="info-box-number">
-                        <?php $sql_b = mysqli_query($con,"SELECT sum(bruto) as sumqty from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_ystrdy' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_today' and g_shift = 'B'");
-                        $rslt_b = mysqli_fetch_array($sql_b);
+                        <?php $sql_b = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'B'");
+                        $rslt_b = sqlsrv_fetch_array($sql_b);
                         ?>
                         <h4 style="font-weight: bold;"><?php echo number_format($rslt_b['sumqty'], 2, ',', '.') ?> KG</h4>
                     </span>
@@ -213,8 +214,8 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                 <div class="info-box-content">
                     <span class="info-box-text"><?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?><br /><?php echo  date('d-F-Y') . ' 07:00'; ?></span>
                     <span class="info-box-number">
-                        <?php $sql_c = mysqli_query($con,"SELECT sum(bruto) as sumqty from tbl_schedule where DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') >= '$eleven_ystrdy' AND DATE_FORMAT(tgl_update,'%Y-%m-%d %H:%i') <= '$eleven_today' and g_shift = 'C'");
-                        $rslt_c = mysqli_fetch_array($sql_c);
+                        <?php $sql_c = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'C'");
+                        $rslt_c = sqlsrv_fetch_array($sql_c);
                         ?>
                         <h4 style="font-weight: bold;"><?php echo number_format($rslt_c['sumqty'], 2, ',', '.') ?> KG</h4>
                     </span>
@@ -228,14 +229,22 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
             $s = date('Y-m-d') . ' 07:00';
             $e = date('Y-m-d') . ' 15:00';
             $ee = date('Y-m-d') . ' 23:00';
-            $sql_shift1 = mysqli_query($con,"SELECT sum(bruto) as totqty, count(g_shift) as `count`, g_shift 
-                FROM db_ikg.tbl_schedule where DATE_FORMAT(tgl_update, '%Y-%m-%d %H:%i') >= '$s' 
-                AND DATE_FORMAT(tgl_update, '%Y-%m-%d %H:%i') <= '$e' order by `count` desc");
-            $sql_shift2 = mysqli_query($con,"SELECT sum(bruto) as totqty, count(g_shift) as `count`, g_shift 
-                FROM db_ikg.tbl_schedule where DATE_FORMAT(tgl_update, '%Y-%m-%d %H:%i') >= '$e' 
-                AND DATE_FORMAT(tgl_update, '%Y-%m-%d %H:%i') <= '$ee' order by `count` desc");
-            $shift1 = mysqli_fetch_array($sql_shift1);
-            $shift2 = mysqli_fetch_array($sql_shift2);
+            $sql_shift1 = sqlsrv_query($con,"SELECT 
+                                                            sum(bruto) as totqty, 
+                                                            count(g_shift) as [count]
+                                                            -- , g_shift 
+                                                            FROM db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$s' 
+                                                            AND CAST(tgl_update AS DATETIME) <= '$e' 
+                                                                order by [count] desc");
+            $sql_shift2 = sqlsrv_query($con,"SELECT 
+                                                            sum(bruto) as totqty, 
+                                                            count(g_shift) as [count]
+                                                            -- , g_shift 
+                                                            FROM db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$e' 
+                                                            AND CAST(tgl_update AS DATETIME) <= '$ee' 
+                                                                order by [count] desc");
+            $shift1 = sqlsrv_fetch_array($sql_shift1);
+            $shift2 = sqlsrv_fetch_array($sql_shift2);
             ?>
             <div class="info-box bg-green">
                 <span class="info-box-icon"><i class="fa fa-line-chart"></i></span>
@@ -282,12 +291,12 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                         <tbody>
                             <?php for ($x = 1; $x <= 12; $x++) {
                                 $month = date('Y-m', strtotime(date('Y-') . $x));
-                                $sql_permonth = mysqli_query($con,"SELECT DATE_FORMAT(date_laporan, '%Y-%m') as bulan, sum(masuk_kain_s3) as masuk_kain, sum(pembagian_kain_s3) as pembagian_kain, sum(buka_kain_s1 + buka_kain_s2 + buka_kain_s3) as buka_kain
+                                $sql_permonth = sqlsrv_query($con,"SELECT FORMAT(CAST(date_laporan as DATE),'yyyy-MM') as bulan, sum(masuk_kain_s3) as masuk_kain, sum(pembagian_kain_s3) as pembagian_kain, sum(buka_kain_s1 + buka_kain_s2 + buka_kain_s3) as buka_kain
                                 FROM db_ikg.tbl_laporanharian
-                                where  DATE_FORMAT(date_laporan, '%Y-%m') = '$month'
-                                group by DATE_FORMAT(date_laporan, '%Y-%m') 
-                                order by DATE_FORMAT(date_laporan, '%Y-%m')");
-                                $data = mysqli_fetch_array($sql_permonth);
+                                where  FORMAT(CAST(date_laporan as DATE),'yyyy-MM') = '$month'
+                                group by FORMAT(CAST(date_laporan as DATE),'yyyy-MM') 
+                                order by FORMAT(CAST(date_laporan as DATE),'yyyy-MM')");
+                                $data = sqlsrv_fetch_array($sql_permonth);
                             ?>
                                 <tr>
                                     <td style="text-align: center;"><?php echo $month ?></td>
@@ -314,13 +323,13 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                 <?php
                 $start = date('Y-m-01');
                 $end = date('Y-m-t');
-                $sql_PerDay = mysqli_query($con,"SELECT date_laporan, masuk_kain_s3, pembagian_kain_s3, (buka_kain_s1 + buka_kain_s2 + buka_kain_s3) as buka_kain
+                $sql_PerDay = sqlsrv_query($con,"SELECT date_laporan, masuk_kain_s3, pembagian_kain_s3, (buka_kain_s1 + buka_kain_s2 + buka_kain_s3) as buka_kain
                 FROM db_ikg.tbl_laporanharian
-                where  DATE_FORMAT(date_laporan, '%Y-%m-%d') >= '$start' 
-                AND DATE_FORMAT(date_laporan, '%Y-%m-%d') <= '$end'
-                group by date_laporan 
+                where  CAST(date_laporan AS DATE) >= '$start' 
+                AND CAST(date_laporan AS DATE) <= '$end'
                 order by date_laporan");
-
+                var_dump($start);
+                var_dump($end);
                 ?>
                 <div class="box-body">
                     <table class="table table-striped table-bordered">
@@ -333,7 +342,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($li = mysqli_fetch_array($sql_PerDay)) : ?>
+                            <?php while ($li = sqlsrv_fetch_array($sql_PerDay)) : ?>
                                 <tr>
                                     <td><?php echo date('d F Y', strtotime($li['date_laporan'])) ?></td>
                                     <td><?php echo number_format($li['masuk_kain_s3'], 2, ',', '.') ?></td>
@@ -376,8 +385,8 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                             <?php
                             $no = 1;
                             $monthNow = date('Y-m');
-                            $query_tenseries = mysqli_query($con,"SELECT pic_schedule, sum(rol) as rolf, count(nodemand) as nodemandf from tbl_schedule where status = 'selesai' and DATE_FORMAT(tgl_mulai,'%Y-%m') = '$monthNow' group by pic_schedule order by rolf desc limit 10");
-                            while ($ten = mysqli_fetch_array($query_tenseries)) {
+                            $query_tenseries = sqlsrv_query($con,"SELECT TOP 10 pic_schedule, sum(rol) as rolf, count(nodemand) as nodemandf from db_ikg.tbl_schedule where [status] = 'selesai' and FORMAT(CAST(tgl_mulai AS DATE),'yyyy-MM') = '$monthNow' group by pic_schedule order by rolf desc");
+                            while ($ten = sqlsrv_fetch_array($query_tenseries)) {
                             ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
@@ -411,8 +420,8 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                             <?php
                             $no = 1;
                             $monthNow = date('Y-m');
-                            $query_tujuan = mysqli_query($con,"SELECT dept_tujuan, sum(rol) as rolf, count(nodemand) as nodemandf from tbl_schedule where status = 'selesai' and DATE_FORMAT(tgl_mulai,'%Y-%m') = '$monthNow' group by dept_tujuan order by nodemandf desc limit 10");
-                            while ($tuj = mysqli_fetch_array($query_tujuan)) {
+                            $query_tujuan = sqlsrv_query($con,"SELECT TOP 10 dept_tujuan, sum(rol) as rolf, count(nodemand) as nodemandf from db_ikg.tbl_schedule where [status] = 'selesai' and FORMAT(CAST(tgl_mulai as DATE),'yyyy-MM') = '$monthNow' group by dept_tujuan order by nodemandf desc");
+                            while ($tuj = sqlsrv_fetch_array($query_tujuan)) {
                             ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
@@ -448,7 +457,7 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                             <?php
                             $no = 1;
                             $monthNow = date('Y-m');
-                            $query_noproses = mysqli_query($con,"SELECT 
+                            $query_noproses = sqlsrv_query($con,"SELECT 
                             a.tgl_masuk,
                             sum(a.bruto) as jml_bruto,
                             sum(a.rol) as jml_rol
@@ -456,10 +465,10 @@ $YstrdyRoll = mysqli_query($con,"SELECT sum(rol) as sumrol from tbl_schedule whe
                             where a.status ='antri mesin'
                             group by 
                             a.tgl_masuk");
-                            while ($np = mysqli_fetch_array($query_noproses)) {
+                            while ($np = sqlsrv_fetch_array($query_noproses)) {
                             ?>
                                 <tr>
-                                    <td><?php echo $np['tgl_masuk'] ?></td>
+                                    <td><?php echo cek($np['tgl_masuk'],'Y-m-d') ?></td>
                                     <td><?php echo $np['jml_bruto'] ?></td>
                                     <td><?php echo $np['jml_rol'] ?></td>
                                 </tr>
