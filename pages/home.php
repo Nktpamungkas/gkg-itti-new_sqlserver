@@ -328,8 +328,8 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                 where  CAST(date_laporan AS DATE) >= '$start' 
                 AND CAST(date_laporan AS DATE) <= '$end'
                 order by date_laporan");
-                var_dump($start);
-                var_dump($end);
+                // var_dump($start);
+                // var_dump($end);
                 ?>
                 <div class="box-body">
                     <table class="table table-striped table-bordered">
