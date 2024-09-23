@@ -2,6 +2,7 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
+include "utils\helper.php"
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -12,7 +13,7 @@ include "koneksi.php";
 </head>
 
 <body>
-  <?php $news = mysqli_query($con,"SELECT * FROM tbl_news_line"); ?>
+  <?php $news = sqlsrv_query($con,"SELECT * FROM db_ikg.tbl_news_line"); ?>
   <div class="row">
     <div class="col-xs-12">
       <div class="box">
@@ -20,8 +21,8 @@ include "koneksi.php";
         </div>
         <div class="box-body">
           <?php
-          $sql = mysqli_query($con,"SELECT * FROM `announcement`");
-          $announ = mysqli_fetch_array($sql);
+          $sql = sqlsrv_query($con,"SELECT * FROM db_ikg.announcement");
+          $announ = sqlsrv_fetch_array($sql);
           ?>
           <div class="tab-content">
             <div class="tab-pane active" id="tab_1">
@@ -54,10 +55,10 @@ include "koneksi.php";
 
           <?php
           if ($_POST['submit']) {
-            $ann = mysqli_real_escape_string($con,$_POST['announcement']);
-            mysqli_query($con,"UPDATE `announcement` SET 
-    `is_active` = '$_POST[is_active]', 
-    `ann` = '$ann' 
+            $ann = cek_input('announcement');
+            sqlsrv_query($con,"UPDATE db_ikg.announcement SET 
+    is_active = '$_POST[is_active]', 
+    ann = '$ann' 
     where id = 1");
             echo '<script>window.location="LineNews"</script>';
           }
