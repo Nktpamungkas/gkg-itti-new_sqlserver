@@ -2,6 +2,7 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
+include "utils/helper.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -52,15 +53,16 @@ include "koneksi.php";
 					<div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="10000">
 						<div class="carousel-inner">
 							<?php
-							$qryGmbr = mysqli_query($con,"SELECT
-   	ceil(count(*)/10) as jumlah
-FROM
-	tbl_schedule 
-WHERE
-	NOT STATUS = 'selesai' 
-	AND tgl_update BETWEEN CONCAT(DATE_FORMAT( now( ), '%Y-%m-%d' ),' 07:00:00') 
-	AND CONCAT(DATE_FORMAT( now( ), '%Y-%m-%d' ) + INTERVAL 1 DAY,' 07:00:00')");
-							$rG = mysqli_fetch_array($qryGmbr);
+							$qryGmbr = sqlsrv_query($con,"SELECT 
+    CEILING(COUNT(*) / 10.0) AS jumlah
+FROM 
+    db_ikg.tbl_schedule 
+WHERE 
+    [STATUS] <> 'selesai' 
+    AND tgl_update BETWEEN CAST(CONVERT(VARCHAR(10), GETDATE(), 120) + ' 07:00:00' AS DATETIME) 
+    AND DATEADD(DAY, 1, CAST(CONVERT(VARCHAR(10), GETDATE(), 120) + ' 07:00:00' AS DATETIME))
+");
+							$rG = sqlsrv_fetch_array($qryGmbr);
 							$pages = $rG['jumlah'] - 1;
 							for ($i = 0; $i <= $pages; $i++) {
 							?>
@@ -71,36 +73,56 @@ WHERE
 									<!-- awal table -->
 									<?php
 									$bts = $i * 3;
-									$data = mysqli_query($con,"SELECT
-   	id,
-	no_mesin,
-	no_urut,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-	jenis_kain,
-	warna,
-	no_warna,
-	lot,
-	sum(rol) as rol,
-	sum(bruto) as bruto,
-	proses,
-	`status`,
-	catatan,
-	ket_status,
-	tgl_delivery
+									$data = sqlsrv_query($con,"SELECT
+    id,
+    no_mesin,
+    no_urut,
+    buyer,
+    langganan,
+    no_order,
+    nokk,
+    jenis_kain,
+    warna,
+    no_warna,
+    lot,
+    SUM(rol) AS rol,
+    SUM(bruto) AS bruto,
+    proses,
+    [status],
+    catatan,
+    ket_status,
+    tgl_delivery
 FROM
-	tbl_schedule 
+    db_ikg.tbl_schedule 
 WHERE
-	NOT STATUS = 'selesai'
-	AND tgl_update BETWEEN CONCAT(DATE_FORMAT( now( ), '%Y-%m-%d' ),' 07:00:00') 
-	AND CONCAT(DATE_FORMAT( now( ), '%Y-%m-%d' ) + INTERVAL 1 DAY,' 07:00:00')
+    [STATUS] <> 'selesai'
+    AND tgl_update BETWEEN 
+        CAST(CONVERT(VARCHAR(10), GETDATE(), 120) + ' 07:00:00' AS DATETIME) 
+        AND 
+        DATEADD(DAY, 1, CAST(CONVERT(VARCHAR(10), GETDATE(), 120) + ' 07:00:00' AS DATETIME))
 GROUP BY
-	no_mesin,
-	no_urut 
+    id,
+    no_mesin,
+    no_urut,
+    buyer,
+    langganan,
+    no_order,
+    nokk,
+    jenis_kain,
+    warna,
+    no_warna,
+    lot,
+    proses,
+    [status],
+    catatan,
+    ket_status,
+    tgl_delivery
 ORDER BY
-	no_mesin ASC,no_urut ASC LIMIT $bts,10");
+    no_mesin ASC, 
+    no_urut ASC
+OFFSET $bts ROWS
+FETCH NEXT 10 ROWS ONLY;
+");
 									?>
 									<div class="box-body table-responsive">
 										<table id="tblr21" class="table table-bordered table-hover table-striped" width="100%">
@@ -150,10 +172,10 @@ ORDER BY
 											<tbody>
 												<?php
 												$col = 0;
-												while ($rowd = mysqli_fetch_array($data)) {
+												while ($rowd = sqlsrv_fetch_array($data)) {
 													$bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-													$qCek = mysqli_query($con,"SELECT `status` FROM tbl_inspection WHERE id_schedule='$rowd[id]' LIMIT 1");
-													$rCEk = mysqli_fetch_array($qCek);
+													$qCek = sqlsrv_query($con,"SELECT TOP 1 [status] FROM db_ikg.tbl_inspection WHERE id_schedule='$rowd[id]'");
+													$rCEk = sqlsrv_fetch_array($qCek);
 												?>
 
 													<tr bgcolor="<?php echo $bgcolor; ?>">
@@ -199,7 +221,7 @@ ORDER BY
 															<font size="-1"><?php echo $rowd['proses']; ?></font>
 														</td>
 														<td align="center">
-															<font size="-1"><?php echo $rowd['tgl_delivery']; ?></font>
+															<font size="-1"><?php echo cek($rowd['tgl_delivery']); ?></font>
 														</td>
 													</tr>
 												<?php
