@@ -2,6 +2,7 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
+include "utils/helper.php"
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -30,25 +31,114 @@ include "koneksi.php";
     <?php
     if (!empty($_POST["submit"])) {
         $nodemand = $_POST['nodemand'];
-        $data = mysqli_query($con,"SELECT a.id, b.id as id_tbl_grbk , a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.nodemand, a.jenis_kain,
-        a.warna, a.no_warna, sum(a.rol) as rol, sum(a.bruto) as bruto, a.proses, a.`status`, a.lot, a.catatan, a.ket_status, 
+        $qdata = "SELECT a.id, b.id as id_tbl_grbk , a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.nodemand, a.jenis_kain,
+        a.warna, a.no_warna, a.rol as rol, a.bruto as bruto, a.proses, a.[status], a.lot, a.catatan, a.ket_status, 
         a.tgl_delivery, a.create_time, a.tgl_mulai, a.tgl_update, a.tgl_stop, a.approve_time, b.no_gerobak1, b.tgl_out1, b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, b.no_gerobak4, 
         b.tgl_out4, b.no_gerobak5, b.tgl_out5, b.no_gerobak6, b.tgl_out6, a.petugas_buka, a.approve_by, a.create_by, a.selesai_by, a.dept_tujuan, a.pic_schedule
-        FROM tbl_schedule a
-        join tbl_gerobak b on a.id = b.id_schedule
-        WHERE a.`status` = 'selesai' AND a.leader_check = 'TRUE' and a.nodemand = '$nodemand'
-        GROUP BY a.nodemand, a.proses, a.no_mesin, a.no_urut
-        ORDER by a.tgl_stop DESC");
+        FROM db_ikg.tbl_schedule a
+        join db_ikg.tbl_gerobak b on a.id = b.id_schedule
+        WHERE a.[status] = 'selesai' AND a.leader_check = 'TRUE' and a.nodemand = '$nodemand'
+        -- GROUP BY a.nodemand, a.proses, a.no_mesin, a.no_urut
+        ORDER by a.tgl_stop DESC";
+        $data=sqlsrv_query($con,$qdata);
     } else {
-        $data = mysqli_query($con,"SELECT a.id, b.id as id_tbl_grbk , a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.nodemand, a.jenis_kain,
-        a.warna, a.no_warna, sum(a.rol) as rol, sum(a.bruto) as bruto, a.proses, a.`status`, a.lot, a.catatan, a.ket_status, 
-        a.tgl_delivery, a.create_time, a.tgl_mulai, a.tgl_update, a.tgl_stop, a.approve_time, b.no_gerobak1, b.tgl_out1, b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, b.no_gerobak4, 
-        b.tgl_out4, b.no_gerobak5, b.tgl_out5, b.no_gerobak6, b.tgl_out6, a.petugas_buka, a.approve_by, a.create_by, a.selesai_by, a.dept_tujuan, a.pic_schedule
-        FROM tbl_schedule a
-        join tbl_gerobak b on a.id = b.id_schedule
-        WHERE a.`status` = 'selesai' AND a.leader_check = 'TRUE' and DATE_FORMAT(a.tgl_update,'%Y-%m-%d') = '2002-01-01'
-        GROUP BY a.nodemand, a.proses, a.no_mesin, a.no_urut
-        ORDER by a.tgl_stop DESC");
+        $qdata = "SELECT
+    a.id,
+    b.id AS id_tbl_grbk,
+    a.no_mesin,
+    a.no_urut,
+    a.buyer,
+    a.langganan,
+    a.no_order,
+    a.nokk,
+    a.nodemand,
+    a.jenis_kain,
+    a.warna,
+    a.no_warna,
+    SUM(a.rol) AS rol,
+    SUM(a.bruto) AS bruto,
+    a.proses,
+    a.[status],
+    a.lot,
+    a.catatan,
+    a.ket_status,
+    a.tgl_delivery,
+    a.create_time,
+    a.tgl_mulai,
+    a.tgl_update,
+    a.tgl_stop,
+    a.approve_time,
+    b.no_gerobak1,
+    b.tgl_out1,
+    b.no_gerobak2,
+    b.tgl_out2,
+    b.no_gerobak3,
+    b.tgl_out3,
+    b.no_gerobak4,
+    b.tgl_out4,
+    b.no_gerobak5,
+    b.tgl_out5,
+    b.no_gerobak6,
+    b.tgl_out6,
+    a.petugas_buka,
+    a.approve_by,
+    a.create_by,
+    a.selesai_by,
+    a.dept_tujuan,
+    a.pic_schedule
+FROM
+    db_ikg.tbl_schedule a
+JOIN
+    db_ikg.tbl_gerobak b ON a.id = b.id_schedule
+WHERE
+    a.[status] = 'selesai'
+    AND a.leader_check = 'TRUE'
+    AND CAST(a.tgl_update AS DATE) = '2002-01-01'
+GROUP BY
+    a.id,
+    b.id,
+    a.no_mesin,
+    a.no_urut,
+    a.buyer,
+    a.langganan,
+    a.no_order,
+    a.nokk,
+    a.nodemand,
+    a.jenis_kain,
+    a.warna,
+    a.no_warna,
+    a.proses,
+    a.[status],
+    a.lot,
+    a.catatan,
+    a.ket_status,
+    a.tgl_delivery,
+    a.create_time,
+    a.tgl_mulai,
+    a.tgl_update,
+    a.tgl_stop,
+    a.approve_time,
+    b.no_gerobak1,
+    b.tgl_out1,
+    b.no_gerobak2,
+    b.tgl_out2,
+    b.no_gerobak3,
+    b.tgl_out3,
+    b.no_gerobak4,
+    b.tgl_out4,
+    b.no_gerobak5,
+    b.tgl_out5,
+    b.no_gerobak6,
+    b.tgl_out6,
+    a.petugas_buka,
+    a.approve_by,
+    a.create_by,
+    a.selesai_by,
+    a.dept_tujuan,
+    a.pic_schedule
+ORDER BY
+    a.tgl_stop DESC";
+    $data=sqlsrv_query($con, $qdata);
     }
     $no = 1;
     $n = 1;
@@ -154,10 +244,11 @@ include "koneksi.php";
                             <?php
                             $col = 0;
                             $no = 1;
-                            while ($rowd = mysqli_fetch_array($data)) {
+                            print_r($qdata) ;
+                            while ($rowd = sqlsrv_fetch_array($data)) {
                                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-                                // $qCek = mysqli_query($con,"SELECT `status` FROM tbl_fin_oven WHERE id_schedule='$rowd[id]' LIMIT 1");
-                                // $rCEk = mysqli_fetch_array($qCek);
+                                // $qCek = sqlsrv_query($con,"SELECT `status` FROM tbl_fin_oven WHERE id_schedule='$rowd[id]' LIMIT 1");
+                                // $rCEk = sqlsrv_fetch_array($qCek);
                             ?>
                                 <tr bgcolor="<?php echo $bgcolor; ?>">
                                     <td class="details-control"></td>
@@ -187,7 +278,7 @@ include "koneksi.php";
                                     </td>
                                     <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['bruto'] ?>" id="bruto_id" href="javascipt:void(0)"><?php echo $rowd['bruto'] ?></a></td>
                                     <td align="center"><?php echo $rowd['lot']; ?> <br> <?php echo $rowd['nodemand']; ?></td>
-                                    <td align="center" width="20"><?php echo $rowd['tgl_delivery']; ?></td>
+                                    <td align="center" width="20"><?php echo cek($rowd['tgl_delivery'],'Y-m-d'); ?></td>
                                     <td><i><?php echo $rowd['nodemand']; ?></i><br />
                                         <i style="color:red;"><strong><?php echo $rowd['catatan']; ?></strong></i><br />
                                         <a href="#" id='<?php echo $rowd['id']; ?>' class="detail_kartu"><span class="label label-danger"><?php echo $rowd['ket_kartu']; ?></span></a>
@@ -195,27 +286,27 @@ include "koneksi.php";
                                     <td class="12">
                                         <a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak1'] ?>" id="grbk1_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak1'] ?></a>
                                     </td>
-                                    <td class="13"><?php echo  $rowd['tgl_out1'] ?></td>
+                                    <td class="13"><?php echo  cek($rowd['tgl_out1'], 'Y-m-d H:i:s') ?></td>
                                     <td class="14">
                                         <a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak2'] ?>" id="grbk2_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak2'] ?></a>
                                     </td>
-                                    <td class="15"><?php echo  $rowd['tgl_out2'] ?></td>
+                                    <td class="15"><?php echo  cek($rowd['tgl_out2'], 'Y-m-d H:i:s') ?></td>
                                     <td class="16">
                                         <a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak3'] ?>" id="grbk3_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak3'] ?></a>
                                     </td>
-                                    <td class="17"><?php echo  $rowd['tgl_out3'] ?></td>
+                                    <td class="17"><?php echo  cek($rowd['tgl_out3'], 'Y-m-d H:i:s') ?></td>
                                     <td class="18"><a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak4'] ?>" id="grbk4_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak4'] ?></a></td>
-                                    <td class="19"><?php echo  $rowd['tgl_out4'] ?></td>
+                                    <td class="19"><?php echo  cek($rowd['tgl_out4'], 'Y-m-d H:i:s') ?></td>
                                     <td class="20"><a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak5'] ?>" id="grbk5_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak5'] ?></a></td>
-                                    <td class="21"><?php echo  $rowd['tgl_out5'] ?></td>
+                                    <td class="21"><?php echo  cek($rowd['tgl_out5'], 'Y-m-d H:i:s') ?></td>
                                     <td class="22"><a data-pk="<?php echo $rowd['id_tbl_grbk'] ?>" data-value="<?php echo  $rowd['no_gerobak6'] ?>" id="grbk6_id" href="javascipt:void(0)"><?php echo  $rowd['no_gerobak6'] ?></a></td>
-                                    <td class="23"><?php echo  $rowd['tgl_out6'] ?></td>
+                                    <td class="23"><?php echo cek($rowd['tgl_out6'], 'Y-m-d H:i:s') ?></td>
                                     <td class="24"><?php echo  $rowd['id'] ?></td>
-                                    <td class="25"><?php echo $rowd['create_time'] ?></td>
-                                    <td class="26"><?php echo $rowd['tgl_mulai'] ?></td>
-                                    <td class="27"><?php echo $rowd['tgl_update'] ?></td>
-                                    <td class="28"><?php echo $rowd['tgl_stop'] ?></td>
-                                    <td class="29"><?php echo $rowd['approve_time'] ?></td>
+                                    <td class="25"><?php echo cek($rowd['create_time'], 'Y-m-d H:i:s') ?></td>
+                                    <td class="26"><?php echo cek($rowd['tgl_mulai'],'Y-m-d H:i:s') ?></td>
+                                    <td class="27"><?php echo cek($rowd['tgl_update'], 'Y-m-d H:i:s') ?></td>
+                                    <td class="28"><?php echo cek($rowd['tgl_stop'], 'Y-m-d H:i:s') ?></td>
+                                    <td class="29"><?php echo cek($rowd['approve_time'], 'Y-m-d H:i:s') ?></td>
                                     <th class="30"><?php echo $rowd['petugas_buka'] ?></th>
                                     <th class="31"><?php echo $rowd['approve_by'] ?></th>
                                     <th class="32"><?php echo $rowd['create_by'] ?></th>

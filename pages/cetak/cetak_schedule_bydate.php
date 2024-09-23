@@ -204,9 +204,9 @@ $shift = $_SESSION['shift'];
                                 a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
                          from tbl_schedule b
                          join tbl_gerobak a on b.id = a.id_schedule
-                         where b.`status` = 'selesai' AND b.leader_check = 'TRUE'
-                         and DATE_FORMAT(b.tgl_update,'%Y-%m-%d') >= '$date_s'
-                         AND DATE_FORMAT(b.tgl_update,'%Y-%m-%d') <= '$date_e'
+                         where b.status = 'selesai' AND b.leader_check = 'TRUE'
+                         and CAST(b.tgl_update AS DATE) >= '$date_s'
+                         AND CAST(b.tgl_update AS DATE) <= '$date_e'
                          GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut,
                          ORDER by b.tgl_stop DESC");
             } else {
@@ -228,7 +228,7 @@ $shift = $_SESSION['shift'];
                     a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
                     from tbl_schedule b
                     join tbl_gerobak a on b.id = a.id_schedule
-                    where b.`status` = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and
+                    where b.status = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and
                     DATE_FORMAT(b.tgl_update,'%Y-%m-%d %H:%i') >= '$start_shift3'
                     AND DATE_FORMAT(b.tgl_update,'%Y-%m-%d %H:%i') <= '$end_shift3'
                     GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut
@@ -241,7 +241,7 @@ $shift = $_SESSION['shift'];
                     a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
                     from tbl_schedule b
                     join tbl_gerobak a on b.id = a.id_schedule
-                    where b.`status` = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and DATE_FORMAT(b.tgl_update,'%Y-%m-%d') >= '$date_s'
+                    where b.status = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and DATE_FORMAT(b.tgl_update,'%Y-%m-%d') >= '$date_s'
                     AND DATE_FORMAT(b.tgl_update,'%Y-%m-%d') <= '$date_e'
                     GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut
                     ORDER by b.tgl_stop DESC");
@@ -518,9 +518,9 @@ $shift = $_SESSION['shift'];
         </thead>
         <?php
         $sql_ = mysqli_query($con,"SELECT * from tbl_footer_cetak 
-                    where `date_start` = '$date_s' 
-                    and `date_end` = '$date_e' 
-                    and `group` = '$group' 
+                    where date_start = '$date_s' 
+                    and date_end = '$date_e' 
+                    and group = '$group' 
                     and shift = '$shift' LIMIT 1");
         $footer = mysqli_fetch_array($sql_);
         ?>

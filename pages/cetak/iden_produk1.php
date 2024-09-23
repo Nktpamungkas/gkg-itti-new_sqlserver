@@ -1,5 +1,5 @@
 <?php
-$con=mysqli_connect("10.0.1.91","dit","4dm1n","db_qc");
+// $con=mysqli_connect("10.0.1.91","dit","4dm1n","db_qc");
 //--
 $idkk = $_REQUEST['idkk'];
 $act = $_GET['g'];

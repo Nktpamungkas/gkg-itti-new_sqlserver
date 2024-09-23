@@ -2,10 +2,11 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
-$kueri = mysqli_query($con,"SELECT *, a.no_order as nomor_order, a.warna as desc_warna, a.lot as lot_a, a.catatan as catatan_a
-                      from tbl_schedule a 
-                      left join tbl_gerobak b on a.id = b.id_schedule where a.id = '$_GET[id]'");
-$data = mysqli_fetch_array($kueri);
+include "../../utils/helper.php";
+$kueri = sqlsrv_query($con,"SELECT *, a.no_order as nomor_order, a.warna as desc_warna, a.lot as lot_a, a.catatan as catatan_a
+                      from db_ikg.tbl_schedule a 
+                      left join db_ikg.tbl_gerobak b on a.id = b.id_schedule where a.id = '$_GET[id]'");
+$data = sqlsrv_fetch_array($kueri);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -217,7 +218,7 @@ $data = mysqli_fetch_array($kueri);
       </tr>
       <tr>
         <td valign="top" style="height: 0.3in;">TANGGAL OUT</td>
-        <td valign="top">: <?php echo $data['tgl_out3'] ?> <b style="font-style: italic;">*</b></td>
+        <td valign="top">: <?php echo cek($data['tgl_out3'],'Y-m-d H:i:s') ?> <b style="font-style: italic;">*</b></td>
       </tr>
       <tr valign="top">
         <td style="height: 0.3in;">NO. ORDER </td>
