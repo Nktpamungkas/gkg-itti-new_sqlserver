@@ -2,7 +2,8 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
-$sql_mesin = mysqli_query($con,"SELECT * from history_status_mesin order by id desc limit 100");
+include "utils/helper.php";
+$sql_mesin = sqlsrv_query($con,"SELECT TOP 100 * from db_ikg.history_status_mesin order by id desc");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,7 +53,7 @@ $sql_mesin = mysqli_query($con,"SELECT * from history_status_mesin order by id d
                 </thead>
                 <tbody>
                     <?php $no = 1;
-                    while ($mesins = mysqli_fetch_array($sql_mesin)) { ?>
+                    while ($mesins = sqlsrv_fetch_array($sql_mesin)) { ?>
                         <tr>
                             <td width=""><?php echo $no++; ?></td>
                             <td align="center" style="font-style: italic;"><b><?php echo $mesins['no_mesin'] ?></b></td>
@@ -65,7 +66,7 @@ $sql_mesin = mysqli_query($con,"SELECT * from history_status_mesin order by id d
                                     <span class="label label-danger"><?php echo $mesins['status'] ?></span>
                                 <?php } ?>
                             </td>
-                            <td align="center"><?php echo $mesins['date_status'] ?></td>
+                            <td align="center"><?php echo cek($mesins['date_status'], 'Y-m-d H:i:s') ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
