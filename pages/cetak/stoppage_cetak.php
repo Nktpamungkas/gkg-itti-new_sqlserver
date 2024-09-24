@@ -1,6 +1,7 @@
 
 <?php 
-$con=mysqli_connect("10.0.0.10","dit","4dm1n","db_ikg");;
+include "../../koneksi.php";
+include "../../utils/helper.php";
 ?>
 <?php
 
@@ -10,8 +11,8 @@ $con=mysqli_connect("10.0.0.10","dit","4dm1n","db_ikg");;
     $jenismc=$_GET['jenis_mesin'];
     $nmmc=$_GET['nama_mesin'];
     if($tglakhir != "" and $tglawal != "")
-		{$tgl=" DATE_FORMAT(a.`tgl_update`,'%Y-%m-%d') BETWEEN '$tglawal' AND '$tglakhir' ";}else{$tgl=" ";}
-	if($gshift=="ALL"){$shift=" ";}else{$shift=" AND `g_shift`='$gshift' ";}
+		{$tgl=" CAST(a.tgl_update AS DATE) BETWEEN '$tglawal' AND '$tglakhir' ";}else{$tgl=" ";}
+	if($gshift=="ALL"){$shift=" ";}else{$shift=" AND g_shift='$gshift' ";}
 
 ?>
 <html>
@@ -106,20 +107,20 @@ border:hidden;
     <tbody>
 	<?php 
 	
-	$sql=mysqli_query($con,"SELECT * FROM `tbl_stoppage_mc` WHERE not kode_stop='' AND jenis_mesin='$jenismc' AND nama_mesin='$nmmc' AND DATE_FORMAT(`tgl_update`,'%Y-%m-%d') BETWEEN '$tglawal' AND '$tglakhir' $shift ORDER BY `nama_mesin` ASC");
+	$sql=sqlsrv_query($con,"SELECT * FROM db_ikg.tbl_stoppage_mc WHERE not kode_stop='' AND jenis_mesin='$jenismc' AND nama_mesin='$nmmc' AND CAST(tgl_update as DATE) BETWEEN '$tglawal' AND '$tglakhir' $shift ORDER BY nama_mesin ASC");
    $no=1;
    $c=0;
-    while($rowd=mysqli_fetch_array($sql)){
+    while($rowd=sqlsrv_fetch_array($sql)){
 		   ?>
       <tr valign="top">
-      <td><div align="center"><?php echo date("Y-m-d", strtotime($rowd['tgl_update']));?></div></td>
+      <td><div align="center"><?php echo cek($rowd['tgl_update'],'Y-m-d');?></div></td>
       <td><div align="center"><?php if($rowd['shift']=="1"){echo $rowd['jam_mulai'];}?></div></td>
       <td><div align="center"><?php if($rowd['shift']=="1"){echo $rowd['jam_stop'];} ?></div></td>
       <td><div align="center">
         <?php 
 		date_default_timezone_set('Asia/Jakarta');
-		$time1=strtotime($rowd['tgl_mulai']." ".$rowd['jam_mulai']);
-		$time2=strtotime($rowd['tgl_stop']." ".$rowd['jam_stop']);
+		$time1=strtotime(cek($rowd['tgl_mulai'],'Y-m-d')." ".$rowd['jam_mulai']);
+		$time2=strtotime(cek($rowd['tgl_stop'],'Y-m-d')." ".$rowd['jam_stop']);
         $diff  = $time2 - $time1;
 
         $jam   = floor($diff / (60 * 60));
@@ -133,8 +134,8 @@ border:hidden;
       <td><div align="center">
         <?php 
 		date_default_timezone_set('Asia/Jakarta');
-		$time1=strtotime($rowd['tgl_mulai']." ".$rowd['jam_mulai']);
-		$time2=strtotime($rowd['tgl_stop']." ".$rowd['jam_stop']);
+		$time1=strtotime(cek($rowd['tgl_mulai'],'Y-m-d')." ".$rowd['jam_mulai']);
+		$time2=strtotime(cek($rowd['tgl_stop'],'Y-m-d')." ".$rowd['jam_stop']);
         $diff  = $time2 - $time1;
 
         $jam   = floor($diff / (60 * 60));
@@ -148,8 +149,8 @@ border:hidden;
       <td><div align="center">
         <?php 
 		date_default_timezone_set('Asia/Jakarta');
-		$time1=strtotime($rowd['tgl_mulai']." ".$rowd['jam_mulai']);
-		$time2=strtotime($rowd['tgl_stop']." ".$rowd['jam_stop']);
+		$time1=strtotime(cek($rowd['tgl_mulai'],'Y-m-d')." ".$rowd['jam_mulai']);
+		$time2=strtotime(cek($rowd['tgl_stop'],'Y-m-d')." ".$rowd['jam_stop']);
         $diff  = $time2 - $time1;
 
         $jam   = floor($diff / (60 * 60));

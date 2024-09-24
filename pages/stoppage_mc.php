@@ -1,7 +1,8 @@
 <?php 
 ini_set("error_reporting", 1);
 session_start();
-include_once ('koneksi.php');
+include_once 'koneksi.php';
+include_once 'utils/helper.php';
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -33,8 +34,8 @@ include_once ('koneksi.php');
 							<select name="operator" class="form-control" id="operator" required>
 								<option value="">-Pilih-</option>
 								<?php
-								$sqlNO = mysqli_query($con,"SELECT DISTINCT nama FROM tbl_user WHERE `status`='Aktif' ORDER BY nama ASC");
-								while ($rNO = mysqli_fetch_array($sqlNO)) {
+								$sqlNO = sqlsrv_query($con,"SELECT DISTINCT nama FROM db_ikg.tbl_user WHERE [status]='Aktif' ORDER BY nama ASC");
+								while ($rNO = sqlsrv_fetch_array($sqlNO)) {
 								?>
 									<option value="<?php echo $rNO['nama']; ?>"><?php echo $rNO['nama']; ?></option>
 								<?php } ?>
@@ -77,8 +78,8 @@ include_once ('koneksi.php');
 						<select name="jenis_mesin" class="form-control" id="jenis_mesin" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlJM = mysqli_query($con,"SELECT DISTINCT jenis_mesin FROM tbl_mesin_gkg ORDER BY jenis_mesin ASC");
-							while ($rJM = mysqli_fetch_array($sqlJM)) {
+							$sqlJM = sqlsrv_query($con,"SELECT DISTINCT jenis_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY jenis_mesin ASC");
+							while ($rJM = sqlsrv_fetch_array($sqlJM)) {
 							?>
 								<option value="<?php echo $rJM['jenis_mesin']; ?>"><?php echo $rJM['jenis_mesin']; ?></option>
 							<?php } ?>
@@ -91,8 +92,8 @@ include_once ('koneksi.php');
 						<select name="nama_mesin" class="form-control" id="nama_mesin" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlNM = mysqli_query($con,"SELECT nama_mesin FROM tbl_mesin_gkg ORDER BY nama_mesin ASC");
-							while ($rNM = mysqli_fetch_array($sqlNM)) {
+							$sqlNM = sqlsrv_query($con,"SELECT nama_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY nama_mesin ASC");
+							while ($rNM = sqlsrv_fetch_array($sqlNM)) {
 							?>
 								<option value="<?php echo $rNM['nama_mesin']; ?>"><?php echo $rNM['nama_mesin']; ?></option>
 							<?php } ?>
@@ -143,8 +144,8 @@ include_once ('koneksi.php');
 						<select name="kode_stop" class="form-control" id="kode_stop" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlKD = mysqli_query($con,"SELECT kode FROM tbl_stop_mesin ORDER BY id ASC");
-							while ($rKD = mysqli_fetch_array($sqlKD)) {
+							$sqlKD = sqlsrv_query($con,"SELECT kode FROM db_ikg.tbl_stop_mesin ORDER BY id ASC");
+							while ($rKD = sqlsrv_fetch_array($sqlKD)) {
 							?>
 								<option value="<?php echo $rKD['kode']; ?>"><?php echo $rKD['kode']; ?></option>
 							<?php } ?>
@@ -173,24 +174,40 @@ if ($_POST['save'] == "save") {
     }else{
         $jamStop = '0'.$_POST['jam_stop'];
     }
+	$g_shift=cek_input('g_shift');
+	$shift = cek_input('shift');
+	$jenis_mesin = cek_input('jenis_mesin');
+	$nama_mesin = cek_input('nama_mesin');
+	$tgl_mulai = cek_input('tgl_mulai');
+	$tgl_stop = cek_input('tgl_stop');
+	$kode_stop = cek_input('kode_stop');
+	$now=new DateTime();
     $operator = strtoupper($_POST['operator']);
-    $sqlData=mysqli_query($con,"INSERT INTO tbl_stoppage_mc SET
-        g_shift     ='$_POST[g_shift]',
-        shift       ='$_POST[shift]',
-        jenis_mesin ='$_POST[jenis_mesin]',
-        nama_mesin  ='$_POST[nama_mesin]',
-        operator    ='$operator',
-        tgl_mulai   ='$_POST[tgl_mulai]',
-        tgl_stop    ='$_POST[tgl_stop]',
-        jam_mulai   ='$jamMulai',
-        jam_stop    ='$jamStop',
-        kode_stop   ='$_POST[kode_stop]',
-        tgl_buat    =now(),
-        tgl_update  =now()
-    ");
+	$data=[$g_shift,
+	$shift,
+$jenis_mesin,
+$nama_mesin, 
+$operator,   
+$tgl_mulai,  
+$tgl_stop,   
+$jamMulai,  
+$jamStop,   
+$kode_stop,  
+$now,   
+$now ];
+    $sqlData="INSERT INTO db_ikg.tbl_stoppage_mc (g_shift,shift,jenis_mesin,nama_mesin,operator,tgl_mulai,
+	tgl_stop,jam_mulai,jam_stop,kode_stop,tgl_buat,tgl_update) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+	$stmt = sqlsrv_prepare($con, $sqlData, $data);
 
-    if($sqlData){
-        echo "<script>swal({
+	if ($stmt === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+	$result = sqlsrv_execute($stmt);
+
+	if ($result === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+	echo "<script>swal({
     title: 'Data Tersimpan',   
     text: 'Klik Ok untuk input data kembali',
     type: 'success',
@@ -200,6 +217,6 @@ if ($_POST['save'] == "save") {
 
     }
     });</script>";
-    }
+    
 }
 ?>

@@ -1,12 +1,13 @@
 <?php 
 ini_set("error_reporting", 1);
 session_start();
-include("../koneksi.php");
+include "koneksi.php";
+include "utils/helper.php";
 $id=$_GET['id'];
 
-$sqlCek=mysqli_query($con,"SELECT * FROM tbl_stoppage_mc WHERE id='$id'");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+$sqlCek=sqlsrv_query($con,"SELECT * FROM db_ikg.tbl_stoppage_mc WHERE id='$id'",array(),array("Scrollable"=>SQLSRV_CURSOR_KEYSET));
+$cek=sqlsrv_num_rows($sqlCek);
+$rcek=sqlsrv_fetch_array($sqlCek);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -62,8 +63,8 @@ $rcek=mysqli_fetch_array($sqlCek);
 						<select name="jenis_mesin" class="form-control" id="jenis_mesin" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlJM = mysqli_query($con,"SELECT DISTINCT jenis_mesin FROM tbl_mesin_gkg ORDER BY jenis_mesin ASC");
-							while ($rJM = mysqli_fetch_array($sqlJM)) {
+							$sqlJM = sqlsrv_query($con,"SELECT DISTINCT jenis_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY jenis_mesin ASC");
+							while ($rJM = sqlsrv_fetch_array($sqlJM)) {
 							?>
 								<option value="<?php echo $rJM['jenis_mesin']; ?>" <?php if($rcek['jenis_mesin']==$rJM['jenis_mesin']){echo "SELECTED";}?>><?php echo $rJM['jenis_mesin']; ?></option>
 							<?php } ?>
@@ -76,8 +77,8 @@ $rcek=mysqli_fetch_array($sqlCek);
 						<select name="nama_mesin" class="form-control" id="nama_mesin" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlNM = mysqli_query($con,"SELECT nama_mesin FROM tbl_mesin_gkg ORDER BY nama_mesin ASC");
-							while ($rNM = mysqli_fetch_array($sqlNM)) {
+							$sqlNM = sqlsrv_query($con,"SELECT nama_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY nama_mesin ASC");
+							while ($rNM = sqlsrv_fetch_array($sqlNM)) {
 							?>
 								<option value="<?php echo $rNM['nama_mesin']; ?>" <?php if($rcek['nama_mesin']==$rNM['nama_mesin']){echo "SELECTED";}?>><?php echo $rNM['nama_mesin']; ?></option>
 							<?php } ?>
@@ -89,7 +90,7 @@ $rcek=mysqli_fetch_array($sqlCek);
                     <div class="col-sm-4">
                         <div class="input-group date">
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-                            <input name="tgl_mulai" type="text" class="form-control pull-right" id="datepicker" placeholder="Tanggal Mulai" value="<?php if($cek>0){echo $rcek['tgl_mulai'];} ?>"  autocomplete="off" required/>
+                            <input name="tgl_mulai" type="text" class="form-control pull-right" id="datepicker" placeholder="Tanggal Mulai" value="<?php if($cek>0){echo cek($rcek['tgl_mulai'],'Y-m-d');} ?>"  autocomplete="off" required/>
                         </div>
                     </div>
                     <div class="col-sm-3">
@@ -108,7 +109,7 @@ $rcek=mysqli_fetch_array($sqlCek);
                     <div class="col-sm-4">
                         <div class="input-group date">
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-                            <input name="tgl_stop" type="text" class="form-control pull-right" id="datepicker1" placeholder="Tanggal Selesai" value="<?php if($cek>0){echo $rcek['tgl_stop'];} ?>" autocomplete="off" required/>
+                            <input name="tgl_stop" type="text" class="form-control pull-right" id="datepicker1" placeholder="Tanggal Selesai" value="<?php if($cek>0){echo cek($rcek['tgl_stop'],'Y-m-d');} ?>" autocomplete="off" required/>
                         </div>
                     </div>
                     <div class="col-sm-3">
@@ -128,8 +129,8 @@ $rcek=mysqli_fetch_array($sqlCek);
 						<select name="kode_stop" class="form-control" id="kode_stop" required>
 							<option value="">-Pilih-</option>
 							<?php
-							$sqlKD = mysqli_query($con,"SELECT kode FROM tbl_stop_mesin ORDER BY id ASC");
-							while ($rKD = mysqli_fetch_array($sqlKD)) {
+							$sqlKD = sqlsrv_query($con,"SELECT kode FROM db_ikg.tbl_stop_mesin ORDER BY id ASC");
+							while ($rKD = sqlsrv_fetch_array($sqlKD)) {
 							?>
 								<option value="<?php echo $rKD['kode']; ?>" <?php if($rcek['kode_stop']==$rKD['kode']){echo "SELECTED";}?>><?php echo $rKD['kode']; ?></option>
 							<?php } ?>
@@ -159,7 +160,7 @@ if ($_POST['save'] == "save") {
         $jamStop = '0'.$_POST['jam_stop'];
     }
     $operator = strtoupper($_POST['operator']);
-    $sqlData=mysqli_query($con,"UPDATE tbl_stoppage_mc SET
+    $sqlData=sqlsrv_query($con,"UPDATE db_ikg.tbl_stoppage_mc SET
         g_shift     ='$_POST[g_shift]',
         shift       ='$_POST[shift]',
         jenis_mesin ='$_POST[jenis_mesin]',
@@ -170,7 +171,7 @@ if ($_POST['save'] == "save") {
         jam_mulai   ='$jamMulai',
         jam_stop    ='$jamStop',
         kode_stop   ='$_POST[kode_stop]',
-        tgl_update  =now()
+        tgl_update  = GETDATE()
 		WHERE id='$id'");
 
     if($sqlData){

@@ -1,7 +1,8 @@
 <?PHP
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
+include "utils/helper.php"
 
 ?>
 
@@ -56,8 +57,8 @@ $GShift	    = isset($_POST['g_shift']) ? $_POST['g_shift'] : '';
 				<select name="jenis_mesin" class="form-control" id="jenis_mesin" required>
 					<option value="">-Pilih-</option>
 					<?php
-					    $sqlJM = mysqli_query($con,"SELECT DISTINCT jenis_mesin FROM tbl_mesin_gkg ORDER BY jenis_mesin ASC");
-					    while ($rJM = mysqli_fetch_array($sqlJM)) {
+					    $sqlJM = sqlsrv_query($con,"SELECT DISTINCT jenis_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY jenis_mesin ASC");
+					    while ($rJM = sqlsrv_fetch_array($sqlJM)) {
 					?>
 					<option value="<?php echo $rJM['jenis_mesin']; ?>" <?php if($JenisMC==$rJM['jenis_mesin']){ echo "SELECTED";}?>><?php echo $rJM['jenis_mesin']; ?></option>
 					<?php } ?>
@@ -70,8 +71,8 @@ $GShift	    = isset($_POST['g_shift']) ? $_POST['g_shift'] : '';
 				<select name="nama_mesin" class="form-control" id="nama_mesin" required>
 					<option value="">-Pilih-</option>
 					<?php
-						$sqlNM = mysqli_query($con,"SELECT nama_mesin FROM tbl_mesin_gkg ORDER BY nama_mesin ASC");
-						while ($rNM = mysqli_fetch_array($sqlNM)) {
+						$sqlNM = sqlsrv_query($con,"SELECT nama_mesin FROM db_ikg.tbl_mesin_gkg ORDER BY nama_mesin ASC");
+						while ($rNM = sqlsrv_fetch_array($sqlNM)) {
 					?>
 					<option value="<?php echo $rNM['nama_mesin']; ?>" <?php if($NamaMC==$rNM['nama_mesin']){ echo "SELECTED";}?>><?php echo $rNM['nama_mesin']; ?></option>
 					<?php } ?>
@@ -129,14 +130,14 @@ $GShift	    = isset($_POST['g_shift']) ? $_POST['g_shift'] : '';
           <tbody>
           <?php
             $no=1;
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-            if($GShift=="ALL"){$gshift=" ";}else{$gshift=" AND `g_shift`='$GShift' ";}
+            if($Awal!=""){ $Where =" AND CAST( tgl_update as DATE ) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($GShift=="ALL"){$gshift=" ";}else{$gshift=" AND g_shift='$GShift' ";}
             if($Awal!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_stoppage_mc WHERE jenis_mesin='$JenisMC' AND nama_mesin='$NamaMC' $Where $gshift ORDER BY id ASC");
+              $qry1=sqlsrv_query($con,"SELECT * FROM db_ikg.tbl_stoppage_mc WHERE jenis_mesin='$JenisMC' AND nama_mesin='$NamaMC' $Where $gshift ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_stoppage_mc WHERE jenis_mesin='$JenisMC' AND nama_mesin='$NamaMC' $Where $gshift ORDER BY id ASC");
+              $qry1=sqlsrv_query($con,"SELECT * FROM db_ikg.tbl_stoppage_mc WHERE jenis_mesin='$JenisMC' AND nama_mesin='$NamaMC' $Where $gshift ORDER BY id ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array(stmt: $qry1)){
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -145,8 +146,8 @@ $GShift	    = isset($_POST['g_shift']) ? $_POST['g_shift'] : '';
             <td align="center"><?php echo $row1['jenis_mesin'];?></td>
             <td align="center"><?php echo $row1['nama_mesin'];?></td>
             <td align="center"><?php echo $row1['operator'];?></td>
-            <td align="center"><?php echo $row1['tgl_mulai']." ".$row1['jam_mulai'];?></td>
-            <td align="center"><?php echo $row1['tgl_stop']." ".$row1['jam_stop'];?></td>
+            <td align="center"><?php echo cek($row1['tgl_mulai'],'Y-m-d')." ".$row1['jam_mulai'];?></td>
+            <td align="center"><?php echo cek($row1['tgl_stop'],'Y-m-d')." ".$row1['jam_stop'];?></td>
             <td align="center"><?php echo $row1['kode_stop'];?></td>
             <td align="center"><div class="btn-group">
             <a href="EditStoppageMC-<?php echo $row1['id']; ?>" class="btn btn-info btn-xs" target="_blank"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
