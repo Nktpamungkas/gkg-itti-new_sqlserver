@@ -8,8 +8,8 @@ if ($_POST) {
     $password_baru = $_POST['password_baru'];
     $Rpassword_baru = $_POST['Rpassword_baru'];
 
-    $get_password_sql = mysqli_query($con,"SELECT * from tbl_user where `id_user` =  '$_SESSION[id_user]'");
-    $get_password = mysqli_fetch_array($get_password_sql);
+    $get_password_sql = sqlsrv_query($con,"SELECT * from db_ikg.tbl_user where [id_user] =  '$_SESSION[id_user]'");
+    $get_password = sqlsrv_fetch_array($get_password_sql);
 
     if ($password != $get_password['password']) {
         $alert = '<div class="alert alert-danger" role="alert">
@@ -21,9 +21,9 @@ if ($_POST) {
                         Password baru anda tidak match !
                       </div>';
         } else {
-            $sqlupdate = mysqli_query($con,"UPDATE `tbl_user` SET
-                                     `password` = '$Rpassword_baru'
-                                     WHERE `id_user`='$_SESSION[id_user]'");
+            $sqlupdate = sqlsrv_query($con,"UPDATE db_ikg.tbl_user SET
+                                     [password] = '$Rpassword_baru'
+                                     WHERE id_user='$_SESSION[id_user]'");
             $sqlupdate;
             $alert = '<div class="alert alert-success" role="alert">
                         Password berhasil di rubah <i class="fa fa-check"></i>
