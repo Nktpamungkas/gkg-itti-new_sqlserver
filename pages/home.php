@@ -181,7 +181,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                         <?php $sql_a = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'A'");
                         $rslt_a = sqlsrv_fetch_array($sql_a);
                         ?>
-                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_a['sumqty'], 2, ',', '.') ?> KG</h4>
+                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_a['sumqty'] ?? 0.0, 2, ',', '.') ?> KG</h4>
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -199,7 +199,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                         <?php $sql_b = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'B'");
                         $rslt_b = sqlsrv_fetch_array($sql_b);
                         ?>
-                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_b['sumqty'], 2, ',', '.') ?> KG</h4>
+                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_b['sumqty'] ?? 0.0, 2, ',', '.') ?> KG</h4>
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -217,7 +217,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                         <?php $sql_c = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update AS DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update AS DATETIME) <= '$eleven_today' and g_shift = 'C'");
                         $rslt_c = sqlsrv_fetch_array($sql_c);
                         ?>
-                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_c['sumqty'], 2, ',', '.') ?> KG</h4>
+                        <h4 style="font-weight: bold;"><?php echo number_format($rslt_c['sumqty'] ?? 0.0, 2, ',', '.') ?> KG</h4>
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -250,11 +250,11 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                 <span class="info-box-icon"><i class="fa fa-line-chart"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text" style="font-style: italic;">HASIL BUKA KAIN HARI INI SHIFT 1 & 2</span>
-                    <span class="info-box-number">SHIFT 1-<?php echo $shift1['g_shift'] . ' : ' . number_format($shift1['totqty'], 2, ',', '.'); ?> KG</span>
+                    <span class="info-box-number">SHIFT 1-<?php echo $shift1['g_shift'] . ' : ' . number_format($shift1['totqty'] ?? 0.0, 2, ',', '.'); ?> KG</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 80%"></div>
                     </div>
-                    <span class="info-box-number">SHIFT 2-<?php echo $shift2['g_shift'] . ' : ' . number_format($shift2['totqty'], 2, ',', '.'); ?> KG</span>
+                    <span class="info-box-number">SHIFT 2-<?php echo $shift2['g_shift'] . ' : ' . number_format($shift2['totqty'] ?? 0.0, 2, ',', '.'); ?> KG</span>
                 </div>
                 <!-- /.info-box-content -->
             </div>
@@ -300,11 +300,11 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                             ?>
                                 <tr>
                                     <td style="text-align: center;"><?php echo $month ?></td>
-                                    <td><?php echo number_format($data['masuk_kain'], 2, ',', '.') ?> Kg</td>
+                                    <td><?php echo number_format($data['masuk_kain'] ?? 0.0, 2, ',', '.') ?> Kg</td>
                                     <td>NCP</td>
-                                    <td><?php echo number_format($data['pembagian_kain'], 2, ',', '.') ?> Kg</td>
+                                    <td><?php echo number_format($data['pembagian_kain'] ?? 0.0, 2, ',', '.') ?> Kg</td>
                                     <td>0</td>
-                                    <td><?php echo number_format($data['buka_kain'], 2, ',', '.') ?> Kg</td>
+                                    <td><?php echo number_format($data['buka_kain'] ?? 0.0, 2, ',', '.') ?> Kg</td>
                                     <td>0</td>
                                 </tr>
                             <?php } ?>
