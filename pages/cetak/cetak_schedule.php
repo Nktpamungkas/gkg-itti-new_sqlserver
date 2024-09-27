@@ -2,10 +2,11 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
+include("../../utils/helper.php");
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<title>Data Pemakaian Bahan Baku <?php echo date('Y-m-d')  ?></title>
+<title>Data Pemakaian Bahan Baku <?php echo date('Y-m-d') ?></title>
 <link rel="stylesheet" href="../../bower_components/print_tools/bootstrap4.css">
 <link href="../../bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
 
@@ -130,12 +131,21 @@ include "../../koneksi.php";
 
 <body>
     <?php
-    $query_shift = mysqli_query($con,"SELECT shift, g_shift, count(g_shift) as jumlah
-    FROM tbl_schedule
-    where DATE_FORMAT(tgl_update,'%Y-%m-%d') = CURDATE() and `status` = 'selesai'
-    GROUP BY g_shift ORDER BY jumlah desc;");
-    $r_shift = mysqli_fetch_array($query_shift);
+    $query_shift = sqlsrv_query($con, "    SELECT a.shift, a.g_shift, COUNT(a.g_shift) AS jumlah
+    FROM db_ikg.tbl_schedule a
+    WHERE CONVERT(VARCHAR(10), a.tgl_update, 120) = CONVERT(VARCHAR(10), GETDATE(), 120) 
+    AND a.status = 'selesai'
+    GROUP BY  a.shift, a.g_shift 
+    ORDER BY jumlah DESC
+");
+
+    if ($query_shift === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+
+    $r_shift = sqlsrv_fetch_array($query_shift, SQLSRV_FETCH_ASSOC);
     ?>
+
     <table class="table-ttd" style="width: 367mm;">
         <tr>
             <td align="center">
@@ -152,8 +162,9 @@ include "../../koneksi.php";
             </td>
         </tr>
     </table>
-    <li style="display:inline; margin-left: 5px;">Tanggal : <?php echo date('Y-m-d')  ?></li>
-    <li style="display:inline; margin-left: 150px;">Shift : <?php echo $r_shift['g_shift'] . '-' . $r_shift['shift'] ?></li>
+    <li style="display:inline; margin-left: 5px;">Tanggal : <?php echo date('Y-m-d') ?></li>
+    <li style="display:inline; margin-left: 150px;">Shift : <?php echo $r_shift['g_shift'] . '-' . $r_shift['shift'] ?>
+    </li>
     <table class="table-ttd" style="width: 367mm;">
         <thead>
             <tr>
@@ -197,23 +208,81 @@ include "../../koneksi.php";
         </thead>
         <tbody>
             <?php
-            $sql = mysqli_query($con,"SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.bruto,
-                b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.pic_schedule, b.petugas_obras, b.no_gerobak, b.leader_check,
-                a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2, a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4, a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
-                from tbl_schedule b
-                join tbl_gerobak a on b.id = a.id_schedule
-                where b.`status` = 'selesai' and b.leader_check = 'TRUE' and DATE_FORMAT(b.tgl_update,'%Y-%m-%d') = CURDATE()
-                GROUP by b.no_mesin, b.no_urut
-                ORDER by b.no_mesin ASC, b.no_urut asc");
-            while ($data = mysqli_fetch_array($sql)) {
-            ?>
+            $sql = sqlsrv_query($con, "SELECT 
+        a.id, 
+        a.no_mesin, 
+        a.no_urut, 
+        a.buyer, 
+        a.langganan, 
+        a.no_order, 
+        a.nokk, 
+        a.jenis_kain,
+        a.warna, 
+        a.no_warna, 
+        SUM(a.rol) AS rol, 
+        SUM(a.bruto) AS bruto, 
+        a.proses, 
+        a.dept_tujuan, 
+        a.pic_schedule, 
+        a.status, 
+        a.lot, 
+        a.catatan, 
+        a.ket_status, 
+        a.tgl_delivery, 
+        b.no_gerobak1, 
+        b.tgl_out1, 
+        b.no_gerobak2, 
+        b.tgl_out2, 
+        b.no_gerobak3, 
+        b.tgl_out3, 
+        b.no_gerobak4, 
+        b.tgl_out4, 
+        b.no_gerobak5, 
+        b.tgl_out5, 
+        b.no_gerobak6, 
+        b.tgl_out6, 
+        a.petugas_obras,
+        a.petugas_buka, 
+        a.approve_by, 
+        a.create_by, 
+        a.selesai_by,
+        a.tgl_mulai, 
+        a.approve_time, 
+        a.create_time, 
+        a.tgl_stop
+    FROM 
+        db_ikg.tbl_schedule a
+    LEFT JOIN 
+        db_ikg.tbl_gerobak b ON a.id = b.id_schedule 
+    WHERE 
+        a.status = 'selesai' 
+        AND a.leader_check = 'TRUE' 
+        AND CONVERT(VARCHAR(10), a.tgl_update, 120) = CONVERT(VARCHAR(10), GETDATE(), 120)
+    GROUP BY 
+        a.id, a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, 
+        a.nokk, a.jenis_kain, a.warna, a.no_warna, a.proses, 
+        a.dept_tujuan, a.pic_schedule, a.status, a.lot, a.catatan, 
+        a.ket_status, a.tgl_delivery, b.no_gerobak1, b.tgl_out1, 
+        b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, 
+        b.no_gerobak4, b.tgl_out4, b.no_gerobak5, b.tgl_out5, 
+        b.no_gerobak6, b.tgl_out6, a.petugas_obras, a.petugas_buka, 
+        a.approve_by, a.create_by, a.selesai_by, a.tgl_mulai, 
+        a.approve_time, a.create_time, a.tgl_stop
+    ORDER BY 
+        a.no_mesin ASC, a.no_urut ASC");
+            while ($data = sqlsrv_fetch_array($sql)) {
+                ?>
                 <tr>
-                    <td align="left" valign="top" id="lggnan"><?php echo $data['langganan']; ?>/<?php echo $data['buyer'] ?></td>
-                    <td align="left" valign="top" id="no-order"><?php echo $data['no_order']; ?></td>
-                    <td align="left" valign="top" id="jenis-kain" style="font-size: 10px;"><?php echo $data['jenis_kain']; ?></td>
-                    <td align="left" valign="top" id="warna"><?php echo $data['warna']; ?></td>
-                    <td align="left" valign="top" id="LOT"><?php echo $data['lot']; ?></td>
-                    <td align="left" valign="top" class="Roll"><?php echo $data['rol']; ?></td>
+                    <td align="left" valign="top" id="lggnan">
+                        <?php echo cek($data['langganan']); ?>/<?php echo cek($data['buyer']); ?>
+                    </td>
+                    <td align="left" valign="top" id="no-order"><?php echo cek($data['no_order']); ?></td>
+                    <td align="left" valign="top" id="jenis-kain" style="font-size: 10px;">
+                        <?php echo cek($data['jenis_kain']); ?>
+                    </td>
+                    <td align="left" valign="top" id="warna"><?php echo cek($data['warna']); ?></td>
+                    <td align="left" valign="top" id="LOT"><?php echo cek($data['lot']); ?></td>
+                    <td align="left" valign="top" class="Roll"><?php echo cek($data['rol']); ?></td>
                     <!-- Qty here -->
                     <?php
                     if ($data['proses'] == 'Celup') {
@@ -388,15 +457,15 @@ include "../../koneksi.php";
                     <!-- Open end -->
                     <!-- time here -->
                     <td align="left" valign="top" id="Mulai"><?php if (strlen($data['tgl_mulai']) == 0) {
-                                                                    echo '-';
-                                                                } else {
-                                                                    echo date('H:i', strtotime($data['tgl_mulai']));
-                                                                } ?></td>
+                        echo '-';
+                    } else {
+                        echo date('H:i', strtotime($data['tgl_mulai']));
+                    } ?></td>
                     <td align="left" valign="top" id="Selesai"><?php if (strlen($data['tgl_stop']) == 0) {
-                                                                    echo '-';
-                                                                } else {
-                                                                    echo date('H:i', strtotime($data['tgl_stop']));
-                                                                } ?></td>
+                        echo '-';
+                    } else {
+                        echo date('H:i', strtotime($data['tgl_stop']));
+                    } ?></td>
                     <!-- End here stupid ! -->
                     <!-- mulai disini -->
                     <td align="left" valign="top" id="No.Mc"><?php echo $data['no_mesin'] ?></td>
@@ -429,19 +498,19 @@ include "../../koneksi.php";
                             echo $data['no_gerobak5'] . ' + ';
                         }
                         echo $data['no_gerobak6']
-                        ?>
+                            ?>
                     </td>
 
                     <td align="left" valign="top" id="buka"><?php echo substr($data['pic_schedule'], 0, 3); ?></td>
                     <td align="left" valign="top" id="obras"><?php echo substr($data['petugas_obras'], 0, 3); ?></td>
 
                     <td align="center" valign="top" id="leader_check" style="font-weight: bold;"><?php
-                                                                                                    if ($data['leader_check'] == 'TRUE') {
-                                                                                                        echo "√";
-                                                                                                    } else {
-                                                                                                        echo "-";
-                                                                                                    }
-                                                                                                    ?></td>
+                    if ($data['leader_check'] == 'TRUE') {
+                        echo "√";
+                    } else {
+                        echo "-";
+                    }
+                    ?></td>
                     <!-- better end -->
                 </tr>
             <?php } ?>
@@ -465,7 +534,8 @@ include "../../koneksi.php";
             </tr>
         </tbody>
     </table>
-    <li><strong>Keterangan : Sebelum diserahkan ke Dyeing/Finishing Leader shift memastikan product telah sesuai dengan permintaan pada kartu
+    <li><strong>Keterangan : Sebelum diserahkan ke Dyeing/Finishing Leader shift memastikan product telah sesuai dengan
+            permintaan pada kartu
             kerja dan diberitanda tickmark(√) pada kolom leader check</strong></li>
     <table class="table-ttd" style="width: 367mm;">
         <thead>
@@ -479,9 +549,15 @@ include "../../koneksi.php";
         <tbody>
             <tr>
                 <td style="font-weight: bold; width: 25mm;">Nama</td>
-                <td align="center"><input type="text" width="100%" style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;" placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
-                <td align="center"><input type="text" width="100%" style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;" placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
-                <td align="center"><input type="text" width="100%" style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;" placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
+                <td align="center"><input type="text" width="100%"
+                        style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;"
+                        placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
+                <td align="center"><input type="text" width="100%"
+                        style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;"
+                        placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
+                <td align="center"><input type="text" width="100%"
+                        style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;"
+                        placeholder="_ _ _ _ _ _ _ _ _ _ _ _"></td>
             </tr>
             <tr>
                 <td style=" font-weight: bold;">Jabatan</td>
@@ -491,9 +567,12 @@ include "../../koneksi.php";
             </tr>
             <tr>
                 <td style="font-weight: bold;">Tanggal</td>
-                <td align="center"><input type="text" width="100%" class="datepick" style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
-                <td align="center"><input type="text" width="100%" class="datepick" style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
-                <td align="center"><input type="text" width="100%" class="datepick" style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
+                <td align="center"><input type="text" width="100%" class="datepick"
+                        style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
+                <td align="center"><input type="text" width="100%" class="datepick"
+                        style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
+                <td align="center"><input type="text" width="100%" class="datepick"
+                        style="text-align:center; border:none; font-size: 8pt;" placeholder="____ __ __"></td>
             </tr>
         </tbody>
     </table>
@@ -501,7 +580,7 @@ include "../../koneksi.php";
 <script src="../../bower_components/print_tools/jquery.3.5.1.js"></script>
 <script src="../../bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.datepick').datepicker({
             autoclose: true,
             format: 'yyyy-mm-dd',
@@ -510,10 +589,10 @@ include "../../koneksi.php";
     })
 </script>
 <script type="text/javascript">
-    $(document).ready(function() {
-        $("#roll").html(function() {
+    $(document).ready(function () {
+        $("#roll").html(function () {
             var a = 0;
-            $(".Roll").each(function() {
+            $(".Roll").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -523,10 +602,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a))
         });
     });
-    $(document).ready(function() {
-        $("#Celup").html(function() {
+    $(document).ready(function () {
+        $("#Celup").html(function () {
             var a = 0;
-            $(".celup").each(function() {
+            $(".celup").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -536,10 +615,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#Scouring").html(function() {
+    $(document).ready(function () {
+        $("#Scouring").html(function () {
             var a = 0;
-            $(".scouring").each(function() {
+            $(".scouring").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -549,10 +628,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#Priset").html(function() {
+    $(document).ready(function () {
+        $("#Priset").html(function () {
             var a = 0;
-            $(".priset").each(function() {
+            $(".priset").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -562,10 +641,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#Relexing").html(function() {
+    $(document).ready(function () {
+        $("#Relexing").html(function () {
             var a = 0;
-            $(".relexing").each(function() {
+            $(".relexing").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -575,10 +654,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#j-pinggir").html(function() {
+    $(document).ready(function () {
+        $("#j-pinggir").html(function () {
             var a = 0;
-            $(".J-pinggir").each(function() {
+            $(".J-pinggir").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -588,10 +667,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#bongkaran").html(function() {
+    $(document).ready(function () {
+        $("#bongkaran").html(function () {
             var a = 0;
-            $(".Bongkaran").each(function() {
+            $(".Bongkaran").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -601,10 +680,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#belah").html(function() {
+    $(document).ready(function () {
+        $("#belah").html(function () {
             var a = 0;
-            $(".Belah").each(function() {
+            $(".Belah").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -614,10 +693,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#continious_bleaching").html(function() {
+    $(document).ready(function () {
+        $("#continious_bleaching").html(function () {
             var a = 0;
-            $(".Continious_bleaching").each(function() {
+            $(".Continious_bleaching").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -627,10 +706,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#pisah_gerobak").html(function() {
+    $(document).ready(function () {
+        $("#pisah_gerobak").html(function () {
             var a = 0;
-            $(".Pisah_gerobak").each(function() {
+            $(".Pisah_gerobak").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -640,10 +719,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#bc").html(function() {
+    $(document).ready(function () {
+        $("#bc").html(function () {
             var a = 0;
-            $(".BC").each(function() {
+            $(".BC").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -653,10 +732,10 @@ include "../../koneksi.php";
             $(this).html(parseFloat(a).toFixed(2))
         });
     });
-    $(document).ready(function() {
-        $("#peach").html(function() {
+    $(document).ready(function () {
+        $("#peach").html(function () {
             var a = 0;
-            $(".Peach").each(function() {
+            $(".Peach").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -667,10 +746,10 @@ include "../../koneksi.php";
         });
     });
     // lain lain
-    $(document).ready(function() {
-        $("#lain-lain").html(function() {
+    $(document).ready(function () {
+        $("#lain-lain").html(function () {
             var a = 0;
-            $(".Lain-lain").each(function() {
+            $(".Lain-lain").each(function () {
                 if ($(this).html().length == 0) {
                     console.log(0)
                 } else {
@@ -681,7 +760,7 @@ include "../../koneksi.php";
         });
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         var Celup = parseFloat($('#Celup').html())
         var Scouring = parseFloat($('#Scouring').html())
         var Priset = parseFloat($('#Priset').html())
@@ -695,11 +774,12 @@ include "../../koneksi.php";
         var peach = parseFloat($('#peach').html())
         var lain_lain = parseFloat($('#lain-lain').html())
 
-        var total = Celup + Scouring + Priset + Relexing + j_pinggir + bongkaran + belah + continious_bleaching + pisah_gerobak + bc + peach + lain_lain;
+        var total = Celup + Scouring + Priset + Relexing + j_pinggir + bongkaran + belah + continious_bleaching +
+            pisah_gerobak + bc + peach + lain_lain;
         $("#summarytotal").html('Total : ' + parseFloat(total).toFixed(2))
     })
 
-    setTimeout(function() {
+    setTimeout(function () {
         window.print()
     }, 1500);
 </script>
