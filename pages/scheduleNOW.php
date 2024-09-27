@@ -1,7 +1,8 @@
 <?php
-ini_set("error_reporting", 1);
+// ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
+include "utils/helper.php";
 ?>
 
 <!DOCTYPE html>
@@ -29,34 +30,50 @@ include "koneksi.php";
 				<div class="box-header">
 					<!-- <h2>Data Keluar Kain Greige Perhari</h2> -->
 					<?php
-					// Query to get distinct dates with demand not null
-					$q_dates = mysqli_query($connn, "SELECT DISTINCT tgl_tutup 
-														FROM tblkeluarkain 
-														WHERE demand IS NOT NULL 
-														ORDER BY tgl_tutup DESC 
-														LIMIT 30");
+        // Query to get distinct dates with demand not null
+        $q_dates = sqlsrv_query($connn, "SELECT DISTINCT TOP 30 tgl_tutup 
+                                           FROM dbnow_gkg.tblkeluarkain 
+                                           WHERE demand IS NOT NULL 
+                                           ORDER BY tgl_tutup DESC;");
 
-					$dates = [];
-					while ($row = mysqli_fetch_assoc($q_dates)) {
-						$dates[] = $row['tgl_tutup'];
-					}
+        // Check for query execution errors
+        if ($q_dates === false) {
+            die("Query failed: " . print_r(sqlsrv_errors(), true));
+        }
 
-					// Set default selected date to the latest date available
-					$default_date = $dates[0];
-					$selected_date = isset($_POST['selected_date']) ? $_POST['selected_date'] : $default_date;
-					?>
-					<form method="POST" action="">
-						<label for="selected_date">Pilih Tanggal:</label>
-						<select id="selected_date" name="selected_date" required>
-							<?php foreach ($dates as $date): ?>
-								<option value="<?= $date; ?>" <?= $date == $selected_date ? 'selected' : ''; ?>>
-									<?= $date; ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-						<input type="submit" value="Filter" class="btn btn-success">
-					</form>
-				</div>
+        // Initialize an array to hold the dates
+        $dates = [];
+        while ($row = sqlsrv_fetch_array($q_dates, SQLSRV_FETCH_ASSOC)) {
+            // Check if tgl_tutup is not null and format it
+            if ($row['tgl_tutup']) {
+                // Format the date to Y-m-d or any format you prefer
+                $dates[] = $row['tgl_tutup']->format('Y-m-d'); 
+            }
+        }
+
+        // Check if any dates were retrieved
+        if (empty($dates)) {
+            die("No dates found.");
+        }
+
+        // Set default selected date to the latest date available
+        $default_date = $dates[0];
+        $selected_date = isset($_POST['selected_date']) ? $_POST['selected_date'] : $default_date;
+        ?>
+        
+        <form method="POST" action="">
+            <label for="selected_date">Pilih Tanggal:</label>
+            <select id="selected_date" name="selected_date" required>
+                <?php foreach ($dates as $date): ?>
+                    <option value="<?= htmlspecialchars($date); ?>" <?= $date == $selected_date ? 'selected' : ''; ?>>
+                        <?= htmlspecialchars($date); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <input type="submit" value="Filter" class="btn btn-success">
+        </form>
+    </div>
+</div>
 				<div class="box-body">
 					<div style="overflow-x:auto;">
 						<table id="TableLeaderCheck" class="table table-bordered table-hover table-striped"
@@ -129,53 +146,58 @@ include "koneksi.php";
 								<?php
 								$no = 1;
 
-								$sql1 = mysqli_query($connn, "SELECT
-																tglkeluar,
-																buyer,
-																custumer,
-																projectcode,
-																prod_order,
-																demand,
-																code,
-																GROUP_CONCAT(DISTINCT TRIM(lot), ' ') AS lot,
-																benang1,
-																benang2,
-																benang3,
-																benang4,
-																warna,
-																jenis_kain,
-																SUM(qty) AS qty,
-																SUM(berat) AS berat,
-																proj_awal,
-																ket,
-																GROUP_CONCAT(DISTINCT TRIM(userid), ' ') AS userid,
-																DATEDIFF( now(), tglkeluar ) AS sisa 
-															FROM
-																tblkeluarkain 
-															WHERE
-																tgl_tutup = '$selected_date'
-																AND demand IS NOT NULL
-															GROUP BY
-																tglkeluar,
-																buyer,
-																custumer,
-																projectcode,
-																prod_order,
-																demand,
-																CODE,
-																benang1,
-																benang2,
-																benang3,
-																benang4,
-																warna,
-																jenis_kain,
-																proj_awal,
-																ket,
-																tglkeluar
-															ORDER BY
-																tgl_tutup DESC,
-																id DESC");
-								while ($r = mysqli_fetch_array($sql1)) {
+								$sql1 = sqlsrv_query($connn, "WITH AggregatedData AS (
+																			SELECT
+																				tglkeluar,
+																				buyer,
+																				custumer,
+																				projectcode,
+																				prod_order,
+																				demand,
+																				code,
+																				STRING_AGG(LTRIM(RTRIM(lot)), ' ') AS lot,
+																				benang1,
+																				benang2,
+																				benang3,
+																				benang4,
+																				warna,
+																				jenis_kain,
+																				SUM(qty) AS qty,
+																				SUM(berat) AS berat,
+																				proj_awal,
+																				ket,
+																				STRING_AGG(LTRIM(RTRIM(userid)), ' ') AS userid,
+																				DATEDIFF(DAY, tglkeluar, GETDATE()) AS sisa,
+																				tgl_tutup
+																			FROM
+																				dbnow_gkg.tblkeluarkain 
+																			WHERE
+																				tgl_tutup = '$selected_date'
+																				AND demand IS NOT NULL
+																			GROUP BY
+																				tglkeluar,
+																				buyer,
+																				custumer,
+																				projectcode,
+																				prod_order,
+																				demand,
+																				code,
+																				benang1,
+																				benang2,
+																				benang3,
+																				benang4,
+																				warna,
+																				jenis_kain,
+																				proj_awal,
+																				ket,
+																				tgl_tutup
+																		)
+
+																		SELECT *,
+																			ROW_NUMBER() OVER (ORDER BY tgl_tutup DESC) AS rn  -- Removed id from ORDER BY
+																		FROM AggregatedData
+								");
+								while ($r = sqlsrv_fetch_array($sql1)) {
 
 									$sqlDB2 = "SELECT
 													p.PRODUCTIONORDERCODE,
@@ -249,7 +271,7 @@ include "koneksi.php";
 												<font size="-1"><?= $no; ?></font>
 											</td>
 											<td align="center">
-												<font size="-1"><?= $r['tglkeluar']; ?></font><br>
+												<font size="-1"><?= cek($r['tglkeluar']); ?></font><br>
 												<?php if (abs($r['sisa']) == "0") {
 													echo "<span class='badge bg-blue'>New</span>";
 												} else {
