@@ -2,6 +2,45 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
+
+function cek($value, $format = null)
+{
+
+    // Check for NULL or empty value
+    if (empty($value)) {
+        return NULL;
+    }
+
+    // Handle DateTime object
+    if ($value instanceof DateTime) {
+        if (is_null($format)) {
+            // Return 'Y-m-d' format if no specific format is provided and not equal to '1900-01-01'
+            return $value->format('Y-m-d') !== '1900-01-01' ? $value->format('Y-m-d') : NULL;
+        }
+        return $value->format($format);
+    }
+
+    // Handle specific string values
+    if ($value === '1900-01-01' || $value === '.00') {
+        return NULL;
+    }
+
+    return $value;
+}
+
+function cek_input($key)
+{
+    if ($_POST[$key] != NULL or $_POST[$key] != '')
+        $_POST[$key] = str_replace(['"', "'"], '', $_POST[$key]);
+
+    if ($_POST[$key] != NULL or $_POST[$key] != '') {
+        return $_POST[$key];
+    } else {
+        return NULL;
+    }
+}
+
+
 $date_s = $_SESSION['date_s'];
 $date_e = $_SESSION['date_e'];
 $group = $_SESSION['group'];
@@ -9,54 +48,33 @@ $shift = $_SESSION['shift'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<title>Data Pemakaian Bahan Baku <?php echo date('Y-m-d')  ?></title>
+<title>Data Pemakaian Bahan Baku <?php echo date('Y-m-d') ?></title>
 <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
 <!-- <link href="../../bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css"> -->
 
 <style>
+@page {
+    size: A4;
+    margin: 20px 20px 20px 20px;
+    font-size: 8pt !important;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    size: landscape;
+}
+
+@media print {
     @page {
         size: A4;
         margin: 20px 20px 20px 20px;
-        font-size: 8pt !important;
-        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
         size: landscape;
+        font-size: 8pt !important;
     }
 
-    @media print {
-        @page {
-            size: A4;
-            margin: 20px 20px 20px 20px;
-            size: landscape;
-            font-size: 8pt !important;
-        }
-
-        html,
-        body {
-            width: 330mm;
-            height: 210mm;
-            background: #FFF;
-            overflow: visible;
-        }
-
-        .table-ttd {
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 8pt !important;
-        }
-
-        .table-ttd tr,
-        .table-ttd tr td {
-            border: 0.5px solid black;
-            padding: 4px;
-            padding: 4px;
-            font-size: 8pt !important;
-        }
-    }
-
-    input,
-    textarea,
-    select {
-        font-family: inherit;
+    html,
+    body {
+        width: 330mm;
+        height: 210mm;
+        background: #FFF;
+        overflow: visible;
     }
 
     .table-ttd {
@@ -67,65 +85,86 @@ $shift = $_SESSION['shift'];
 
     .table-ttd tr,
     .table-ttd tr td {
-        border: 1px solid black;
-        padding: 5px;
-        padding: 5px;
+        border: 0.5px solid black;
+        padding: 4px;
+        padding: 4px;
         font-size: 8pt !important;
     }
+}
 
-    tr {
-        /* page-break-before: always; */
-        page-break-inside: avoid;
-        font-size: 8pt !important;
-    }
+input,
+textarea,
+select {
+    font-family: inherit;
+}
 
-    .tablee td,
-    .tablee th {
-        /* border: 1px solid black; */
-        padding: 5px;
-        font-size: 8pt !important;
+.table-ttd {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 8pt !important;
+}
 
-    }
+.table-ttd tr,
+.table-ttd tr td {
+    border: 1px solid black;
+    padding: 5px;
+    padding: 5px;
+    font-size: 8pt !important;
+}
 
-    .rotation {
-        transform: rotate(-90deg);
-        /* Legacy vendor prefixes that you probably don't need... */
-        /* Safari */
-        -webkit-transform: rotate(-90deg);
-        /* Firefox */
-        -moz-transform: rotate(-90deg);
-        /* IE */
-        -ms-transform: rotate(-90deg);
-        /* Opera */
-        -o-transform: rotate(-90deg);
-        /* Internet Explorer */
-        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
-    }
+tr {
+    /* page-break-before: always; */
+    page-break-inside: avoid;
+    font-size: 8pt !important;
+}
 
-    ul,
-    li {
-        list-style-type: none;
-        font-size: 8pt !important;
-    }
+.tablee td,
+.tablee th {
+    /* border: 1px solid black; */
+    padding: 5px;
+    font-size: 8pt !important;
 
-    .tablee tr:nth-child(even) {
-        background-color: #f2f2f2;
-        font-size: 8pt !important;
-    }
+}
 
-    .table-ttd thead tr td,
-    #tr-footer {
-        font-weight: bold;
-    }
+.rotation {
+    transform: rotate(-90deg);
+    /* Legacy vendor prefixes that you probably don't need... */
+    /* Safari */
+    -webkit-transform: rotate(-90deg);
+    /* Firefox */
+    -moz-transform: rotate(-90deg);
+    /* IE */
+    -ms-transform: rotate(-90deg);
+    /* Opera */
+    -o-transform: rotate(-90deg);
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
 
-    .tablee th {
-        padding-top: 12px;
-        padding-bottom: 12px;
-        text-align: left;
-        background-color: #4CAF50;
-        color: white;
-        font-size: 8pt !important;
-    }
+ul,
+li {
+    list-style-type: none;
+    font-size: 8pt !important;
+}
+
+.tablee tr:nth-child(even) {
+    background-color: #f2f2f2;
+    font-size: 8pt !important;
+}
+
+.table-ttd thead tr td,
+#tr-footer {
+    font-weight: bold;
+}
+
+.tablee th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 8pt !important;
+}
 </style>
 
 <head>
@@ -197,13 +236,13 @@ $shift = $_SESSION['shift'];
         <tbody>
             <?php
             if ($group == 'ALL') {
-                $sql = mysqli_query($con,"SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
+                $sql = sqlsrv_query($con, "SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
                                 b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.petugas_obras,
                                 b.no_gerobak, b.leader_check, a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2,
                                 a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4,
                                 a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
-                         from tbl_schedule b
-                         join tbl_gerobak a on b.id = a.id_schedule
+                         from db_ikg.tbl_schedule b
+                         join db_ikg.tbl_gerobak a on b.id = a.id_schedule
                          where b.status = 'selesai' AND b.leader_check = 'TRUE'
                          and CAST(b.tgl_update AS DATE) >= '$date_s'
                          AND CAST(b.tgl_update AS DATE) <= '$date_e'
@@ -221,44 +260,178 @@ $shift = $_SESSION['shift'];
                         $start_shift3 = $_SESSION["date_s"] . " 23:00";
                         $end_shift3 = $_SESSION["date_e"] . " 07:00";
                     }
-                    $sql = mysqli_query($con,"SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
-                    b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.petugas_obras,
-                    b.no_gerobak, b.leader_check, a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2,
-                    a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4,
-                    a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
-                    from tbl_schedule b
-                    join tbl_gerobak a on b.id = a.id_schedule
-                    where b.status = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and
-                    DATE_FORMAT(b.tgl_update,'%Y-%m-%d %H:%i') >= '$start_shift3'
-                    AND DATE_FORMAT(b.tgl_update,'%Y-%m-%d %H:%i') <= '$end_shift3'
-                    GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut
-                    ORDER by b.tgl_stop DESC");
+                    $sql = sqlsrv_query($con, "
+                                            SELECT 
+                                                b.langganan, 
+                                                b.buyer, 
+                                                b.no_order, 
+                                                b.jenis_kain, 
+                                                b.warna, 
+                                                b.lot, 
+                                                b.rol, 
+                                                b.proses, 
+                                                b.pic_schedule,
+                                                b.bruto, 
+                                                b.buka, 
+                                                b.tgl_mulai, 
+                                                b.tgl_stop, 
+                                                b.no_mesin, 
+                                                b.petugas_buka, 
+                                                b.petugas_obras,
+                                                b.no_gerobak, 
+                                                b.leader_check, 
+                                                a.no_gerobak1, 
+                                                a.tgl_out1, 
+                                                a.no_gerobak2, 
+                                                a.tgl_out2,
+                                                a.no_gerobak3, 
+                                                a.tgl_out3, 
+                                                a.no_gerobak4, 
+                                                a.tgl_out4,
+                                                a.no_gerobak5, 
+                                                a.tgl_out5, 
+                                                a.no_gerobak6, 
+                                                a.tgl_out6
+                                            FROM 
+                                                db_ikg.tbl_schedule b
+                                            JOIN 
+                                                db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                                            WHERE 
+                                                b.status = 'selesai' 
+                                                AND b.leader_check = 'TRUE' 
+                                                AND b.g_shift = '$group' 
+                                                AND CONVERT(DATETIME, b.tgl_update) >= CONVERT(DATETIME, '$start_shift3') 
+                                                AND CONVERT(DATETIME, b.tgl_update) <= CONVERT(DATETIME, '$end_shift3')
+                                            GROUP BY 
+                                                b.langganan, 
+                                                b.buyer, 
+                                                b.no_order, 
+                                                b.jenis_kain, 
+                                                b.warna, 
+                                                b.lot, 
+                                                b.rol, 
+                                                b.proses, 
+                                                b.pic_schedule,
+                                                b.bruto, 
+                                                b.buka, 
+                                                b.tgl_mulai, 
+                                                b.tgl_stop, 
+                                                b.no_mesin, 
+                                                b.petugas_buka, 
+                                                b.petugas_obras,
+                                                b.no_gerobak, 
+                                                b.leader_check, 
+                                                a.no_gerobak1, 
+                                                a.tgl_out1, 
+                                                a.no_gerobak2, 
+                                                a.tgl_out2,
+                                                a.no_gerobak3, 
+                                                a.tgl_out3, 
+                                                a.no_gerobak4, 
+                                                a.tgl_out4,
+                                                a.no_gerobak5, 
+                                                a.tgl_out5, 
+                                                a.no_gerobak6, 
+                                                a.tgl_out6
+                                            ORDER BY 
+                                                b.tgl_stop DESC
+                                        ");
+
                 } else if ($shift == 'ALL') {
-                    $sql = mysqli_query($con,"SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
-                    b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.petugas_obras,
-                    b.no_gerobak, b.leader_check, a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2,
-                    a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4,
-                    a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
-                    from tbl_schedule b
-                    join tbl_gerobak a on b.id = a.id_schedule
-                    where b.status = 'selesai' AND b.leader_check = 'TRUE' and b.g_shift = '$group' and DATE_FORMAT(b.tgl_update,'%Y-%m-%d') >= '$date_s'
-                    AND DATE_FORMAT(b.tgl_update,'%Y-%m-%d') <= '$date_e'
-                    GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut
-                    ORDER by b.tgl_stop DESC");
+                    $sql = sqlsrv_query($con, "
+                                            SELECT 
+                                                b.langganan, 
+                                                b.buyer, 
+                                                b.no_order, 
+                                                b.jenis_kain, 
+                                                b.warna, 
+                                                b.lot, 
+                                                b.rol, 
+                                                b.proses, 
+                                                b.pic_schedule,
+                                                b.bruto, 
+                                                b.buka, 
+                                                b.tgl_mulai, 
+                                                b.tgl_stop, 
+                                                b.no_mesin, 
+                                                b.petugas_buka, 
+                                                b.petugas_obras,
+                                                b.no_gerobak, 
+                                                b.leader_check, 
+                                                a.no_gerobak1, 
+                                                a.tgl_out1, 
+                                                a.no_gerobak2, 
+                                                a.tgl_out2,
+                                                a.no_gerobak3, 
+                                                a.tgl_out3, 
+                                                a.no_gerobak4, 
+                                                a.tgl_out4,
+                                                a.no_gerobak5, 
+                                                a.tgl_out5, 
+                                                a.no_gerobak6, 
+                                                a.tgl_out6
+                                            FROM 
+                                                db_ikg.tbl_schedule b
+                                            JOIN 
+                                                db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                                            WHERE 
+                                                b.status = 'selesai' 
+                                                AND b.leader_check = 'TRUE' 
+                                                AND b.g_shift = '$group' 
+                                                AND CONVERT(DATE, b.tgl_update) >= CONVERT(DATE, '$date_s') 
+                                                AND CONVERT(DATE, b.tgl_update) <= CONVERT(DATE, '$date_e')
+                                            GROUP BY 
+                                                b.langganan, 
+                                                b.buyer, 
+                                                b.no_order, 
+                                                b.jenis_kain, 
+                                                b.warna, 
+                                                b.lot, 
+                                                b.rol, 
+                                                b.proses, 
+                                                b.pic_schedule,
+                                                b.bruto, 
+                                                b.buka, 
+                                                b.tgl_mulai, 
+                                                b.tgl_stop, 
+                                                b.no_mesin, 
+                                                b.petugas_buka, 
+                                                b.petugas_obras,
+                                                b.no_gerobak, 
+                                                b.leader_check, 
+                                                a.no_gerobak1, 
+                                                a.tgl_out1, 
+                                                a.no_gerobak2, 
+                                                a.tgl_out2,
+                                                a.no_gerobak3, 
+                                                a.tgl_out3, 
+                                                a.no_gerobak4, 
+                                                a.tgl_out4,
+                                                a.no_gerobak5, 
+                                                a.tgl_out5, 
+                                                a.no_gerobak6, 
+                                                a.tgl_out6
+                                            ORDER BY 
+                                                b.tgl_stop DESC
+                                        ");
+
                 }
             }
 
-            while ($data = mysqli_fetch_array($sql)) {
-            ?>
-                <tr>
-                    <td align="left" valign="top" id="lggnan"><?php echo $data['langganan']; ?>/<?php echo $data['buyer'] ?></td>
-                    <td align="left" valign="top" id="no-order"><?php echo $data['no_order']; ?></td>
-                    <td align="left" valign="top" id="jenis-kain" style="font-size: 10px;"><?php echo $data['jenis_kain']; ?></td>
-                    <td align="left" valign="top" id="warna"><?php echo $data['warna']; ?></td>
-                    <td align="left" valign="top" id="LOT"><?php echo $data['lot']; ?></td>
-                    <td align="left" valign="top" class="Roll"><?php echo $data['rol']; ?></td>
-                    <!-- Qty here -->
-                    <?php
+            while ($data = sqlsrv_fetch_array($sql)) {
+                ?>
+            <tr>
+                <td align="left" valign="top" id="lggnan"><?php echo $data['langganan']; ?>/<?php echo $data['buyer'] ?>
+                </td>
+                <td align="left" valign="top" id="no-order"><?php echo $data['no_order']; ?></td>
+                <td align="left" valign="top" id="jenis-kain" style="font-size: 10px;">
+                    <?php echo $data['jenis_kain']; ?>
+                </td>
+                <td align="left" valign="top" id="warna"><?php echo $data['warna']; ?></td>
+                <td align="left" valign="top" id="LOT"><?php echo $data['lot']; ?></td>
+                <td align="left" valign="top" class="Roll"><?php echo $data['rol']; ?></td>
+                <!-- Qty here -->
+                <?php
                     if ($data['proses'] == 'Celup') {
                         echo '<td align="center" valign="top" class="celup">' . $data["bruto"] . '</td>
                         <td align="center" valign="top" class="scouring">0</td>
@@ -417,9 +590,9 @@ $shift = $_SESSION['shift'];
                         <td align="center" valign="top" class="Lain-lain">' . $data["bruto"] . '</td>';
                     }
                     ?>
-                    <!-- Qty end -->
-                    <!-- Open here -->
-                    <?php
+                <!-- Qty end -->
+                <!-- Open here -->
+                <?php
                     if ($data['buka'] == 'Biasa') {
                         echo '<td colspan="2" align="center" valign="center" id="Biasa" style="font-weight: bold;">√</td>
                         <td colspan="2" align="center" valign="center" id="Balik">-</td>';
@@ -428,23 +601,23 @@ $shift = $_SESSION['shift'];
                         <td colspan="2" align="center" valign="center" id="Balik" style="font-weight: bold;">√</td>';
                     }
                     ?>
-                    <!-- Open end -->
-                    <!-- time here -->
-                    <td align="left" valign="top" id="Mulai"><?php if (strlen($data['tgl_mulai']) == 0) {
-                                                                    echo '-';
-                                                                } else {
-                                                                    echo date('H:i', strtotime($data['tgl_mulai']));
-                                                                } ?></td>
-                    <td align="left" valign="top" id="Selesai"><?php if (strlen($data['tgl_stop']) == 0) {
-                                                                    echo '-';
-                                                                } else {
-                                                                    echo date('H:i', strtotime($data['tgl_stop']));
-                                                                } ?></td>
-                    <!-- End here stupid ! -->
-                    <!-- mulai disini -->
-                    <td align="left" valign="top" id="No.Mc"><?php echo $data['no_mesin'] ?></td>
-                    <td align="left" valign="top" id="No. Gerobak">
-                        <?php if (empty($data['no_gerobak2'])) {
+                <!-- Open end -->
+                <!-- time here -->
+                <td align="left" valign="top" id="Mulai"><?php if (strlen($data['tgl_mulai']) == 0) {
+                        echo '-';
+                    } else {
+                        echo date('H:i', strtotime(cek($data['tgl_mulai'])));
+                    } ?></td>
+                <td align="left" valign="top" id="Selesai"><?php if (strlen(cek($data['tgl_stop'])) == 0) {
+                        echo '-';
+                    } else {
+                        echo date('H:i', strtotime(cek($data['tgl_stop'])));
+                    } ?></td>
+                <!-- End here stupid ! -->
+                <!-- mulai disini -->
+                <td align="left" valign="top" id="No.Mc"><?php echo $data['no_mesin'] ?></td>
+                <td align="left" valign="top" id="No. Gerobak">
+                    <?php if (empty($data['no_gerobak2'])) {
                             echo strtoupper($data['no_gerobak1']);
                         } else {
                             echo strtoupper($data['no_gerobak1']) . ' + ';
@@ -470,20 +643,21 @@ $shift = $_SESSION['shift'];
                             echo strtoupper($data['no_gerobak5']) . ' + ';
                         }
                         echo strtoupper($data['no_gerobak6']) ?>
-                    </td>
+                </td>
 
-                    <td align="left" valign="top" id="buka"><?php echo substr($data['pic_schedule'], 0, 3); ?></td>
-                    <td align="left" valign="top" id="obras"><?php echo strtoupper(substr($data['petugas_obras'], 0, 3)); ?></td>
+                <td align="left" valign="top" id="buka"><?php echo substr($data['pic_schedule'], 0, 3); ?></td>
+                <td align="left" valign="top" id="obras"><?php echo strtoupper(substr($data['petugas_obras'], 0, 3)); ?>
+                </td>
 
-                    <td align="center" valign="top" id="leader check" style="font-weight: bold;"><?php
-                                                                                                    if ($data['leader_check'] == 'TRUE') {
-                                                                                                        echo "√";
-                                                                                                    } else {
-                                                                                                        echo "-";
-                                                                                                    }
-                                                                                                    ?></td>
-                    <!-- better end -->
-                </tr>
+                <td align="center" valign="top" id="leader check" style="font-weight: bold;"><?php
+                    if ($data['leader_check'] == 'TRUE') {
+                        echo "√";
+                    } else {
+                        echo "-";
+                    }
+                    ?></td>
+                <!-- better end -->
+            </tr>
             <?php } ?>
             <tr id="tr-footer">
                 <td align="center" valign="bottom" colspan="5" style="text-align: right;" valign="bottom">Total</td>
@@ -505,7 +679,8 @@ $shift = $_SESSION['shift'];
             </tr>
         </tbody>
     </table>
-    <li><strong>Keterangan : Sebelum diserahkan ke Dyeing/Finishing Leader shift memastikan product telah sesuai dengan permintaan pada kartu
+    <li><strong>Keterangan : Sebelum diserahkan ke Dyeing/Finishing Leader shift memastikan product telah sesuai dengan
+            permintaan pada kartu
             kerja dan diberitanda tickmark(√) pada kolom leader check</strong></li>
     <table class="table-ttd" style="width: 367mm;">
         <thead>
@@ -517,22 +692,44 @@ $shift = $_SESSION['shift'];
             </tr>
         </thead>
         <?php
-        $sql_ = mysqli_query($con,"SELECT * from tbl_footer_cetak 
-                    where date_start = '$date_s' 
-                    and date_end = '$date_e' 
-                    and group = '$group' 
-                    and shift = '$shift' LIMIT 1");
-        $footer = mysqli_fetch_array($sql_);
-        ?>
+    $sql = sqlsrv_query($con, "
+    SELECT TOP 1 * 
+    FROM db_ikg.tbl_footer_cetak 
+    WHERE date_start = '$date_s' 
+    AND date_end = '$date_e' 
+    AND [group] = '$group' 
+    AND shift = '$shift'
+");
+
+    // Check if the query was successful
+    if ($sql === false) {
+        die(print_r(sqlsrv_errors(), true)); // Print errors if the query fails
+    }
+
+    $footer = sqlsrv_fetch_array($sql);
+
+    if ($footer === null) {
+        // Handle case when no rows are returned
+        echo "No results found.";
+    } else {
+        // Process the $footer array as needed
+        // For example, print a value
+        echo $footer['some_column_name']; // Replace 'some_column_name' with an actual column name
+    }
+    ?>
+
         <tbody>
             <tr>
                 <td style="font-weight: bold; width: 25mm;">Nama</td>
 
                 <td align="center" class="leader_1">
                     <?php if ($footer['leader_1'] == '') { ?>
-                        <input type="text" name="leader_1" id="leader_1" width="100%" style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;" placeholder="_ _ _ _ _ _ _ _ _ _ _ _"> &nbsp;&nbsp; <button type="button" id="act_leader_1"> ✔ </button>
+                    <input type="text" name="leader_1" id="leader_1" width="100%"
+                        style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;"
+                        placeholder="_ _ _ _ _ _ _ _ _ _ _ _"> &nbsp;&nbsp; <button type="button" id="act_leader_1"> ✔
+                    </button>
                     <?php } else { ?>
-                        <strong width="100%"><?php echo $footer['leader_1'] ?></strong>
+                    <strong width="100%"><?php echo cek($footer['leader_1']) ?></strong>
                     <?php } ?>
                 </td>
 
@@ -541,9 +738,12 @@ $shift = $_SESSION['shift'];
                 </td>
                 <td align="center" class="ass_spv">
                     <?php if ($footer['ass_spv'] == '') { ?>
-                        <input type="text" name="ass_spv" id="ass_spv" width="100%" style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;" placeholder="_ _ _ _ _ _ _ _ _ _ _ _"> &nbsp;&nbsp; <button type="button" id="act_ass_spv"> ✔ </button>
+                    <input type="text" name="ass_spv" id="ass_spv" width="100%"
+                        style="text-align:center; text-transform: uppercase; border:none; font-size: 8pt;"
+                        placeholder="_ _ _ _ _ _ _ _ _ _ _ _"> &nbsp;&nbsp; <button type="button" id="act_ass_spv"> ✔
+                    </button>
                     <?php } else { ?>
-                        <strong width="100%"><?php echo $footer['ass_spv'] ?></strong>
+                    <strong width="100%"><?php echo $footer['ass_spv'] ?></strong>
                     <?php } ?>
                 </td>
             </tr>
@@ -565,85 +765,85 @@ $shift = $_SESSION['shift'];
 </body>
 <script src="../../bower_components/print_tools/jquery.3.5.1.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#act_leader_1').click(function() {
-            if ($('#leader_1').val() == '') {
-                alert('Nama Leader Kosong !');
-            } else {
-                $.ajax({
-                    url: "../ajax/insert_leader_1.php",
-                    type: "POST",
-                    data: {
-                        date_start: '<?php echo $date_s ?>',
-                        date_end: '<?php echo $date_e ?>',
-                        group: '<?php echo $group ?>',
-                        shift: '<?php echo $shift ?>',
-                        leader_1: $('#leader_1').val().toUpperCase()
-                    },
-                    success: function(response) {
-                        res = JSON.parse(response)
-                        $('.leader_1').html('<strong width="100%">' + res.leader + '</strong>');
-                        $('.tgl_left').html('<strong width="100%">' + res.tgl + '</strong>');
-                    },
-                    error: function() {
-                        alert('insert data error hubungi DIT Dept !')
-                    }
-                });
-            }
-        })
-        $('#act_leader_2').click(function() {
-            if ($('#leader_2').val() == '') {
-                alert('Nama Leader Kosong !');
-            } else {
-                $.ajax({
-                    url: "../ajax/insert_leader_2.php",
-                    type: "POST",
-                    data: {
-                        date_start: '<?php echo $date_s ?>',
-                        date_end: '<?php echo $date_e ?>',
-                        group: '<?php echo $group ?>',
-                        shift: '<?php echo $shift ?>',
-                        leader_2: $('#leader_2').val().toUpperCase()
-                    },
-                    success: function(response) {
-                        res = JSON.parse(response)
-                        $('.leader_2').html('<strong width="100%">' + res.leader + '</strong>');
-                        $('.tgl_center').html('<strong width="100%">' + res.tgl + '</strong>');
-                    },
-                    error: function() {
-                        alert('insert data error hubungi DIT Dept !')
-                    }
-                });
-            }
-        })
-        $('#act_ass_spv').click(function() {
-            if ($('#ass_spv').val() == '') {
-                alert('Nama Ass Spv Kosong !');
-            } else {
-                $.ajax({
-                    url: "../ajax/insert_ass_spv.php",
-                    type: "POST",
-                    data: {
-                        date_start: '<?php echo $date_s ?>',
-                        date_end: '<?php echo $date_e ?>',
-                        group: '<?php echo $group ?>',
-                        shift: '<?php echo $shift ?>',
-                        ass_spv: $('#ass_spv').val().toUpperCase()
-                    },
-                    success: function(response) {
-                        res = JSON.parse(response)
-                        $('.ass_spv').html('<strong width="100%">' + res.leader + '</strong>');
-                        $('.tgl_right').html('<strong width="100%">' + res.tgl + '</strong>');
-                    },
-                    error: function() {
-                        alert('insert data error hubungi DIT Dept !')
-                    }
-                });
-            }
-        })
-
-
+$(document).ready(function() {
+    $('#act_leader_1').click(function() {
+        if ($('#leader_1').val() == '') {
+            alert('Nama Leader Kosong !');
+        } else {
+            $.ajax({
+                url: "../ajax/insert_leader_1.php",
+                type: "POST",
+                data: {
+                    date_start: '<?php echo $date_s ?>',
+                    date_end: '<?php echo $date_e ?>',
+                    group: '<?php echo $group ?>',
+                    shift: '<?php echo $shift ?>',
+                    leader_1: $('#leader_1').val().toUpperCase()
+                },
+                success: function(response) {
+                    res = JSON.parse(response)
+                    $('.leader_1').html('<strong width="100%">' + res.leader + '</strong>');
+                    $('.tgl_left').html('<strong width="100%">' + res.tgl + '</strong>');
+                },
+                error: function() {
+                    alert('insert data error hubungi DIT Dept !')
+                }
+            });
+        }
     })
+    $('#act_leader_2').click(function() {
+        if ($('#leader_2').val() == '') {
+            alert('Nama Leader Kosong !');
+        } else {
+            $.ajax({
+                url: "../ajax/insert_leader_2.php",
+                type: "POST",
+                data: {
+                    date_start: '<?php echo $date_s ?>',
+                    date_end: '<?php echo $date_e ?>',
+                    group: '<?php echo $group ?>',
+                    shift: '<?php echo $shift ?>',
+                    leader_2: $('#leader_2').val().toUpperCase()
+                },
+                success: function(response) {
+                    res = JSON.parse(response)
+                    $('.leader_2').html('<strong width="100%">' + res.leader + '</strong>');
+                    $('.tgl_center').html('<strong width="100%">' + res.tgl + '</strong>');
+                },
+                error: function() {
+                    alert('insert data error hubungi DIT Dept !')
+                }
+            });
+        }
+    })
+    $('#act_ass_spv').click(function() {
+        if ($('#ass_spv').val() == '') {
+            alert('Nama Ass Spv Kosong !');
+        } else {
+            $.ajax({
+                url: "../ajax/insert_ass_spv.php",
+                type: "POST",
+                data: {
+                    date_start: '<?php echo $date_s ?>',
+                    date_end: '<?php echo $date_e ?>',
+                    group: '<?php echo $group ?>',
+                    shift: '<?php echo $shift ?>',
+                    ass_spv: $('#ass_spv').val().toUpperCase()
+                },
+                success: function(response) {
+                    res = JSON.parse(response)
+                    $('.ass_spv').html('<strong width="100%">' + res.leader + '</strong>');
+                    $('.tgl_right').html('<strong width="100%">' + res.tgl + '</strong>');
+                },
+                error: function() {
+                    alert('insert data error hubungi DIT Dept !')
+                }
+            });
+        }
+    })
+
+
+})
 </script>
 
 
@@ -655,198 +855,199 @@ $shift = $_SESSION['shift'];
 
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        $("#roll").html(function() {
-            let a = 0;
-            $(".Roll").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+$(document).ready(function() {
+    $("#roll").html(function() {
+        let a = 0;
+        $(".Roll").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#Celup").html(function() {
-            let a = 0;
-            $(".celup").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#Celup").html(function() {
+        let a = 0;
+        $(".celup").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#Scouring").html(function() {
-            let a = 0;
-            $(".scouring").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#Scouring").html(function() {
+        let a = 0;
+        $(".scouring").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#Priset").html(function() {
-            let a = 0;
-            $(".priset").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#Priset").html(function() {
+        let a = 0;
+        $(".priset").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#Relexing").html(function() {
-            let a = 0;
-            $(".relexing").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#Relexing").html(function() {
+        let a = 0;
+        $(".relexing").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#j-pinggir").html(function() {
-            let a = 0;
-            $(".J-pinggir").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#j-pinggir").html(function() {
+        let a = 0;
+        $(".J-pinggir").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#bongkaran").html(function() {
-            let a = 0;
-            $(".Bongkaran").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#bongkaran").html(function() {
+        let a = 0;
+        $(".Bongkaran").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#belah").html(function() {
-            let a = 0;
-            $(".Belah").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#belah").html(function() {
+        let a = 0;
+        $(".Belah").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#continious_bleaching").html(function() {
-            let a = 0;
-            $(".Continious_bleaching").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#continious_bleaching").html(function() {
+        let a = 0;
+        $(".Continious_bleaching").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#pisah_gerobak").html(function() {
-            let a = 0;
-            $(".Pisah_gerobak").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#pisah_gerobak").html(function() {
+        let a = 0;
+        $(".Pisah_gerobak").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#bc").html(function() {
-            let a = 0;
-            $(".BC").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#bc").html(function() {
+        let a = 0;
+        $(".BC").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    $(document).ready(function() {
-        $("#peach").html(function() {
-            let a = 0;
-            $(".Peach").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+$(document).ready(function() {
+    $("#peach").html(function() {
+        let a = 0;
+        $(".Peach").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
-    // lain lain
-    $(document).ready(function() {
-        $("#lain-lain").html(function() {
-            let a = 0;
-            $(".Lain-lain").each(function() {
-                if ($(this).html().length == 0) {
-                    console.log(0)
-                } else {
-                    a += parseFloat($(this).html());
-                }
-            });
-            $(this).html(parseFloat(a).toFixed(2))
+});
+// lain lain
+$(document).ready(function() {
+    $("#lain-lain").html(function() {
+        let a = 0;
+        $(".Lain-lain").each(function() {
+            if ($(this).html().length == 0) {
+                console.log(0)
+            } else {
+                a += parseFloat($(this).html());
+            }
         });
+        $(this).html(parseFloat(a).toFixed(2))
     });
+});
 
-    $(document).ready(function() {
-        var Celup = parseFloat($('#Celup').html())
-        var Scouring = parseFloat($('#Scouring').html())
-        var Priset = parseFloat($('#Priset').html())
-        var Relexing = parseFloat($('#Relexing').html())
-        var j_pinggir = parseFloat($('#j-pinggir').html())
-        var bongkaran = parseFloat($('#bongkaran').html())
-        var belah = parseFloat($('#belah').html())
-        var continious_bleaching = parseFloat($('#continious_bleaching').html())
-        var pisah_gerobak = parseFloat($('#pisah_gerobak').html())
-        var bc = parseFloat($('#bc').html())
-        var peach = parseFloat($('#peach').html())
-        var lain_lain = parseFloat($('#lain-lain').html())
+$(document).ready(function() {
+    var Celup = parseFloat($('#Celup').html())
+    var Scouring = parseFloat($('#Scouring').html())
+    var Priset = parseFloat($('#Priset').html())
+    var Relexing = parseFloat($('#Relexing').html())
+    var j_pinggir = parseFloat($('#j-pinggir').html())
+    var bongkaran = parseFloat($('#bongkaran').html())
+    var belah = parseFloat($('#belah').html())
+    var continious_bleaching = parseFloat($('#continious_bleaching').html())
+    var pisah_gerobak = parseFloat($('#pisah_gerobak').html())
+    var bc = parseFloat($('#bc').html())
+    var peach = parseFloat($('#peach').html())
+    var lain_lain = parseFloat($('#lain-lain').html())
 
-        var total = Celup + Scouring + Priset + Relexing + j_pinggir + bongkaran + belah + continious_bleaching + pisah_gerobak + bc + peach + lain_lain;
-        $("#summarytotal").html('Total : ' + parseFloat(total).toFixed(2))
-    })
+    var total = Celup + Scouring + Priset + Relexing + j_pinggir + bongkaran + belah + continious_bleaching +
+        pisah_gerobak + bc + peach + lain_lain;
+    $("#summarytotal").html('Total : ' + parseFloat(total).toFixed(2))
+})
 
-    // setTimeout(function() {
-    //     window.print()
-    // }, 105000);
+// setTimeout(function() {
+//     window.print()
+// }, 105000);
 </script>
 
 </html>
