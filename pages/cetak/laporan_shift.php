@@ -2,8 +2,9 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
+include "../../utils/helper.php";
 
-$sql_data = mysqli_query($con, "SELECT
+$sql_data = sqlsrv_query($con, "SELECT
                                     date_laporan,
                                     group_s1,
                                     group_s2,
@@ -72,7 +73,7 @@ $sql_data = mysqli_query($con, "SELECT
                                     created_by,
                                     last_updated_at,
                                     last_updated_by,
-                                    `status`,
+                                    [status],
                                     absensi_s1,
                                     absensi_s2,
                                     absensi_s3,
@@ -85,14 +86,14 @@ $sql_data = mysqli_query($con, "SELECT
                                     masuk_kain_manual,
                                     bagi_kain_manual 
                                 FROM
-                                    tbl_laporanharian 
+                                    db_ikg.tbl_laporanharian 
                                 WHERE
                                     date_laporan = '$_GET[date_laporan]'");
-$data = mysqli_fetch_array($sql_data);
+$data = sqlsrv_fetch_array($sql_data);
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<title>Laporan Shift <?php echo $data['date_laporan'] ?></title>
+<title>Laporan Shift <?php echo cek($data['date_laporan']) ?></title>
 <link href="../../bower_components/print_tools/bootstrap4.css">
 <link href="styles_cetak.css" rel="stylesheet" type="text/css">
 <style>
@@ -234,19 +235,19 @@ $data = mysqli_fetch_array($sql_data);
 			<td width="147">Departement :</td>
 			<td width="39">GKG</td>
 			<td width="59">Tanggal :</td>
-			<td width="39" align="center"><?php echo $data['date_laporan'] ?></td>
+			<td width="39" align="center"><?php echo cek($data['date_laporan']) ?></td>
 			<td width="57">Shift :</td>
 			<td width="47"><?php echo $data['group_s1'] ?>-1</td>
 			<td width="147">Departement :</td>
 			<td width="39">GKG</td>
 			<td width="59">Tanggal :</td>
-			<td width="39" align="center"><?php echo $data['date_laporan'] ?></td>
+			<td width="39" align="center"><?php echo cek($data['date_laporan']) ?></td>
 			<td width="57">Shift :</td>
 			<td width="47"><?php echo $data['group_s2'] ?>-2</td>
 			<td width="147">Departement :</td>
 			<td width="39">GKG</td>
 			<td width="59">Tanggal :</td>
-			<td width="39" align="center"><?php echo $data['date_laporan'] ?></td>
+			<td width="39" align="center"><?php echo cek($data['date_laporan']) ?></td>
 			<td width="57">Shift :</td>
 			<td width="54"><?php echo $data['group_s3'] ?>-3</td>
 		</tr>
@@ -539,9 +540,9 @@ $data = mysqli_fetch_array($sql_data);
 		</tr>
 		<tr>
 			<td>Tanggal</td>
-			<td align="center"><?php echo $_GET['date_laporan'] ?></td>
-			<td align="center"><?php echo $_GET['date_laporan'] ?></td>
-			<td align="center"><?php echo $_GET['date_laporan'] ?></td>
+			<td align="center"><?php echo cek($_GET['date_laporan']) ?></td>
+			<td align="center"><?php echo cek($_GET['date_laporan']) ?></td>
+			<td align="center"><?php echo cek($_GET['date_laporan']) ?></td>
 			<td></td>
 		</tr>
 		<tr height="90px">

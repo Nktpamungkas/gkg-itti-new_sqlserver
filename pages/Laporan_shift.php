@@ -860,8 +860,8 @@ $(document).ready(function() {
 						)
 						Cek_if_data_was_exist($('#tgl_laporan').val())
 					},
-					error: function() {
-						SpinnerHide(), alert("Error");
+					error: function(response) {
+						SpinnerHide(), alert(response.responseText);
 					}
 				});
 		}

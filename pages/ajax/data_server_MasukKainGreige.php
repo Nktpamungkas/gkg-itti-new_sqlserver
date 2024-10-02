@@ -2,8 +2,8 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
-$sql_get = mysqli_query($con, "SELECT * from tbl_laporanharian where date_laporan = '$_POST[tgl_laporan]'");
-$get = mysqli_fetch_array($sql_get);
+$sql_get = sqlsrv_query($con, "SELECT * from db_ikg.tbl_laporanharian where date_laporan = '$_POST[tgl_laporan]'");
+$get = sqlsrv_fetch_array($sql_get);
 
 
 $tgl_laporan = '';

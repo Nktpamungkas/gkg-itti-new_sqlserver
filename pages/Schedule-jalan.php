@@ -28,15 +28,15 @@ include "koneksi.php";
 
 <body>
     <?php
-    $data = mysqli_query($con,"SELECT a.id, a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.jenis_kain,
-    a.warna, a.no_warna, sum(a.rol) as rol, sum(a.bruto) as bruto, a.proses, a.dept_tujuan, a.`status`, a.lot, a.catatan, a.ket_status, 
+    $data = sqlsrv_query($con,"SELECT a.id, a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.jenis_kain,
+    a.warna, a.no_warna, a.rol as rol, a.bruto as bruto, a.proses, a.dept_tujuan, a.status, a.lot, a.catatan, a.ket_status, 
     a.tgl_delivery, b.no_gerobak1, b.tgl_out1, b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, b.no_gerobak4, 
     b.tgl_out4, b.no_gerobak5, b.tgl_out5, b.no_gerobak6, b.tgl_out6, a.create_time, a.tgl_mulai, a.tgl_update, a.tgl_stop, a.approve_time,
     a.create_by, a.selesai_by, a.petugas_buka, a.pic_schedule
-    FROM tbl_schedule a
-    left join tbl_gerobak b on a.id = b.id_schedule
-    WHERE a.`status` = 'sedang jalan'
-    GROUP BY no_mesin, no_urut
+    FROM db_ikg.tbl_schedule a
+    left join db_ikg.tbl_gerobak b on a.id = b.id_schedule
+    WHERE a.status = 'sedang jalan'
+    -- GROUP BY no_mesin, no_urut
     ORDER BY no_mesin ASC,no_urut ASC");
     $no = 1;
     $n = 1;
@@ -115,10 +115,10 @@ include "koneksi.php";
                             <?php
                             $col = 0;
                             $no = 1;
-                            while ($rowd = mysqli_fetch_array($data)) {
+                            while ($rowd = sqlsrv_fetch_array($data)) {
                                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-                                //$qCek = mysqli_query($con,"SELECT `status` FROM tbl_fin_oven WHERE id_schedule='$rowd[id]' LIMIT 1");
-                                //$rCEk = mysqli_fetch_array($qCek);
+                                //$qCek = sqlsrv_query($con,"SELECT `status` FROM tbl_fin_oven WHERE id_schedule='$rowd[id]' LIMIT 1");
+                                //$rCEk = sqlsrv_fetch_array($qCek);
                             ?>
                                 <tr bgcolor="<?php echo $bgcolor; ?>">
                                     <td class="details-control"></td>
