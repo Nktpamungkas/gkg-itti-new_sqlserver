@@ -392,7 +392,7 @@ include("../../koneksi.php");
             <?php while ($rowdb21 = db2_fetch_assoc($stmt1)): ?>
                 <tr>
                     <td align="left" valign="top"><?= htmlspecialchars($rowdb21['LANGGANAN']); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowdb21['PRO_ORDER']); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowdb21['PRO_ORDER'] ?? ''); ?></td>
                     <td align="left" valign="top" style="font-size: 10px;"><?= htmlspecialchars($rowdb21['JENISKAIN']); ?>
                     </td>
                     <td align="left" valign="top"><?= htmlspecialchars($rowdb21['WARNA']); ?></td>
@@ -402,7 +402,7 @@ include("../../koneksi.php");
                     <td align="left" valign="top">
                         <?php
                         $productionDemandCode = $rowdb21['PRODUCTIONDEMANDCODE'];
-                        if (substr($rowdb21['PRO_ORDER'], 0, 3) === 'CWD') {
+                        if (substr($rowdb21['PRO_ORDER'] ?? '', 0, 3) === 'CWD') {
                             $q_roll_jasa = db2_exec($conn1, "SELECT s.ABSUNIQUEID 
                                                     FROM PRODUCTIONDEMAND p 
                                                     LEFT JOIN SALESORDERLINE s ON s.SALESORDERCODE = p.ORIGDLVSALORDLINESALORDERCODE 
@@ -519,7 +519,7 @@ include("../../koneksi.php");
                             $rowOutTo = db2_fetch_assoc($stmtOutTo);
                             if ($rowOutTo) {
                                 // Display the operation code and step group code
-                                echo htmlspecialchars($rowOutTo['OPERATIONCODE']) . " / " . htmlspecialchars($rowOutTo['OPSTEPGROUPCODE']);
+                                echo htmlspecialchars($rowOutTo['OPERATIONCODE'] ?? '') . " / " . htmlspecialchars($rowOutTo['OPSTEPGROUPCODE'] ?? '');
                             } else {
                                 echo "No results found."; // Handle the case where no results are returned
                             }
@@ -608,15 +608,15 @@ include("../../koneksi.php");
                     </td>
                     <td align="left" valign="top"><?= htmlspecialchars(round($qtyproses - $beratkain['beratkain'], 2)); ?>
                     </td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['OPERATIONCODE']); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['MULAI']); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['SELESAI']); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['WORKCENTERCODE']); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['GEROBAK']); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['OPERATIONCODE'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['MULAI'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['SELESAI'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['WORKCENTERCODE'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['GEROBAK'] ?? ''); ?></td>
                     <td align="left" valign="top"><?= htmlspecialchars($gabungan_no_gerobak); ?></td>
                     <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP1']); ?></td>
-                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP2']); ?></td>
-                    <td align="center" valign="top"><?= htmlspecialchars($_SESSION['nama1Gkg']); ?></td>
+                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP2'] ?? ''); ?></td>
+                    <td align="center" valign="top"><?= htmlspecialchars($_SESSION['nama1Gkg'] ?? ''); ?></td>
                 </tr>
             <?php endwhile; ?>
 
