@@ -235,191 +235,204 @@ li {
         </thead>
         <tbody>
             <?php
-            if ($group == 'ALL') {
-                $sql = sqlsrv_query($con, "SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
-                                b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.petugas_obras,
-                                b.no_gerobak, b.leader_check, a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2,
-                                a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4,
-                                a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
-                         from db_ikg.tbl_schedule b
-                         join db_ikg.tbl_gerobak a on b.id = a.id_schedule
-                         where b.status = 'selesai' AND b.leader_check = 'TRUE'
-                         and CAST(b.tgl_update AS DATE) >= '$date_s'
-                         AND CAST(b.tgl_update AS DATE) <= '$date_e'
-                         GROUP by b.nokk, b.proses, b.no_mesin, b.no_urut,
-                         ORDER by b.tgl_stop DESC");
-            } else {
-                if ($shift != 'ALL') {
-                    if ($shift == 1) {
-                        $start_shift3 = $_SESSION["date_s"] . " 07:00";
-                        $end_shift3 = $_SESSION["date_e"] . " 15:00";
-                    } else if ($shift == 2) {
-                        $start_shift3 = $_SESSION["date_s"] . " 15:00";
-                        $end_shift3 = $_SESSION["date_e"] . " 23:00";
-                    } else if ($shift == 3) {
-                        $start_shift3 = $_SESSION["date_s"] . " 23:00";
-                        $end_shift3 = $_SESSION["date_e"] . " 07:00";
-                    }
-                    $sql = sqlsrv_query($con, "
-                                            SELECT 
-                                                b.langganan, 
-                                                b.buyer, 
-                                                b.no_order, 
-                                                b.jenis_kain, 
-                                                b.warna, 
-                                                b.lot, 
-                                                b.rol, 
-                                                b.proses, 
-                                                b.pic_schedule,
-                                                b.bruto, 
-                                                b.buka, 
-                                                b.tgl_mulai, 
-                                                b.tgl_stop, 
-                                                b.no_mesin, 
-                                                b.petugas_buka, 
-                                                b.petugas_obras,
-                                                b.no_gerobak, 
-                                                b.leader_check, 
-                                                a.no_gerobak1, 
-                                                a.tgl_out1, 
-                                                a.no_gerobak2, 
-                                                a.tgl_out2,
-                                                a.no_gerobak3, 
-                                                a.tgl_out3, 
-                                                a.no_gerobak4, 
-                                                a.tgl_out4,
-                                                a.no_gerobak5, 
-                                                a.tgl_out5, 
-                                                a.no_gerobak6, 
-                                                a.tgl_out6
-                                            FROM 
-                                                db_ikg.tbl_schedule b
-                                            JOIN 
-                                                db_ikg.tbl_gerobak a ON b.id = a.id_schedule
-                                            WHERE 
-                                                b.status = 'selesai' 
-                                                AND b.leader_check = 'TRUE' 
-                                                AND b.g_shift = '$group' 
-                                                AND CONVERT(DATETIME, b.tgl_update) >= CONVERT(DATETIME, '$start_shift3') 
-                                                AND CONVERT(DATETIME, b.tgl_update) <= CONVERT(DATETIME, '$end_shift3')
-                                            GROUP BY 
-                                                b.langganan, 
-                                                b.buyer, 
-                                                b.no_order, 
-                                                b.jenis_kain, 
-                                                b.warna, 
-                                                b.lot, 
-                                                b.rol, 
-                                                b.proses, 
-                                                b.pic_schedule,
-                                                b.bruto, 
-                                                b.buka, 
-                                                b.tgl_mulai, 
-                                                b.tgl_stop, 
-                                                b.no_mesin, 
-                                                b.petugas_buka, 
-                                                b.petugas_obras,
-                                                b.no_gerobak, 
-                                                b.leader_check, 
-                                                a.no_gerobak1, 
-                                                a.tgl_out1, 
-                                                a.no_gerobak2, 
-                                                a.tgl_out2,
-                                                a.no_gerobak3, 
-                                                a.tgl_out3, 
-                                                a.no_gerobak4, 
-                                                a.tgl_out4,
-                                                a.no_gerobak5, 
-                                                a.tgl_out5, 
-                                                a.no_gerobak6, 
-                                                a.tgl_out6
-                                            ORDER BY 
-                                                b.tgl_stop DESC
-                                        ");
+if ($group == 'ALL') {
+    $sql = sqlsrv_query($con, "SELECT b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, b.lot, b.rol, b.proses, b.pic_schedule,
+                            b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, b.no_mesin, b.petugas_buka, b.petugas_obras,
+                            b.no_gerobak, b.leader_check, a.no_gerobak1, a.tgl_out1, a.no_gerobak2, a.tgl_out2,
+                            a.no_gerobak3, a.tgl_out3, a.no_gerobak4, a.tgl_out4,
+                            a.no_gerobak5, a.tgl_out5, a.no_gerobak6, a.tgl_out6
+                     FROM db_ikg.tbl_schedule b
+                     JOIN db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                     WHERE b.status = 'selesai' AND b.leader_check = 'TRUE'
+                     AND CAST(b.tgl_update AS DATE) >= '$date_s'
+                     AND CAST(b.tgl_update AS DATE) <= '$date_e'
+                     GROUP BY b.langganan, b.buyer, b.no_order, b.jenis_kain, b.warna, 
+                              b.lot, b.rol, b.proses, b.pic_schedule,
+                              b.bruto, b.buka, b.tgl_mulai, b.tgl_stop, 
+                              b.no_mesin, b.petugas_buka, b.petugas_obras,
+                              b.no_gerobak, b.leader_check, 
+                              a.no_gerobak1, a.tgl_out1, 
+                              a.no_gerobak2, a.tgl_out2,
+                              a.no_gerobak3, a.tgl_out3, 
+                              a.no_gerobak4, a.tgl_out4,
+                              a.no_gerobak5, a.tgl_out5, 
+                              a.no_gerobak6, a.tgl_out6
+                     ORDER BY b.tgl_stop DESC");
+} else {
+    if ($shift != 'ALL') {
+        if ($shift == 1) {
+            $start_shift3 = $_SESSION["date_s"] . " 07:00";
+            $end_shift3 = $_SESSION["date_e"] . " 15:00";
+        } else if ($shift == 2) {
+            $start_shift3 = $_SESSION["date_s"] . " 15:00";
+            $end_shift3 = $_SESSION["date_e"] . " 23:00";
+        } else if ($shift == 3) {
+            $start_shift3 = $_SESSION["date_s"] . " 23:00";
+            $end_shift3 = $_SESSION["date_e"] . " 07:00";
+        }
+        $sql = sqlsrv_query($con, "SELECT 
+                                    b.langganan, 
+                                    b.buyer, 
+                                    b.no_order, 
+                                    b.jenis_kain, 
+                                    b.warna, 
+                                    b.lot, 
+                                    b.rol, 
+                                    b.proses, 
+                                    b.pic_schedule,
+                                    b.bruto, 
+                                    b.buka, 
+                                    b.tgl_mulai, 
+                                    b.tgl_stop, 
+                                    b.no_mesin, 
+                                    b.petugas_buka, 
+                                    b.petugas_obras,
+                                    b.no_gerobak, 
+                                    b.leader_check, 
+                                    a.no_gerobak1, 
+                                    a.tgl_out1, 
+                                    a.no_gerobak2, 
+                                    a.tgl_out2,
+                                    a.no_gerobak3, 
+                                    a.tgl_out3, 
+                                    a.no_gerobak4, 
+                                    a.tgl_out4,
+                                    a.no_gerobak5, 
+                                    a.tgl_out5, 
+                                    a.no_gerobak6, 
+                                    a.tgl_out6
+                                FROM 
+                                    db_ikg.tbl_schedule b
+                                JOIN 
+                                    db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                                WHERE 
+                                    b.status = 'selesai' 
+                                    AND b.leader_check = 'TRUE' 
+                                    AND b.g_shift = '$group' 
+                                    AND CONVERT(DATETIME, b.tgl_update) >= CONVERT(DATETIME, '$start_shift3') 
+                                    AND CONVERT(DATETIME, b.tgl_update) <= CONVERT(DATETIME, '$end_shift3')
+                                GROUP BY 
+                                    b.langganan, 
+                                    b.buyer, 
+                                    b.no_order, 
+                                    b.jenis_kain, 
+                                    b.warna, 
+                                    b.lot, 
+                                    b.rol, 
+                                    b.proses, 
+                                    b.pic_schedule,
+                                    b.bruto, 
+                                    b.buka, 
+                                    b.tgl_mulai, 
+                                    b.tgl_stop, 
+                                    b.no_mesin, 
+                                    b.petugas_buka, 
+                                    b.petugas_obras,
+                                    b.no_gerobak, 
+                                    b.leader_check, 
+                                    a.no_gerobak1, 
+                                    a.tgl_out1, 
+                                    a.no_gerobak2, 
+                                    a.tgl_out2,
+                                    a.no_gerobak3, 
+                                    a.tgl_out3, 
+                                    a.no_gerobak4, 
+                                    a.tgl_out4,
+                                    a.no_gerobak5, 
+                                    a.tgl_out5, 
+                                    a.no_gerobak6, 
+                                    a.tgl_out6
+                                ORDER BY 
+                                    b.tgl_stop DESC");
 
-                } else if ($shift == 'ALL') {
-                    $sql = sqlsrv_query($con, "
-                                            SELECT 
-                                                b.langganan, 
-                                                b.buyer, 
-                                                b.no_order, 
-                                                b.jenis_kain, 
-                                                b.warna, 
-                                                b.lot, 
-                                                b.rol, 
-                                                b.proses, 
-                                                b.pic_schedule,
-                                                b.bruto, 
-                                                b.buka, 
-                                                b.tgl_mulai, 
-                                                b.tgl_stop, 
-                                                b.no_mesin, 
-                                                b.petugas_buka, 
-                                                b.petugas_obras,
-                                                b.no_gerobak, 
-                                                b.leader_check, 
-                                                a.no_gerobak1, 
-                                                a.tgl_out1, 
-                                                a.no_gerobak2, 
-                                                a.tgl_out2,
-                                                a.no_gerobak3, 
-                                                a.tgl_out3, 
-                                                a.no_gerobak4, 
-                                                a.tgl_out4,
-                                                a.no_gerobak5, 
-                                                a.tgl_out5, 
-                                                a.no_gerobak6, 
-                                                a.tgl_out6
-                                            FROM 
-                                                db_ikg.tbl_schedule b
-                                            JOIN 
-                                                db_ikg.tbl_gerobak a ON b.id = a.id_schedule
-                                            WHERE 
-                                                b.status = 'selesai' 
-                                                AND b.leader_check = 'TRUE' 
-                                                AND b.g_shift = '$group' 
-                                                AND CONVERT(DATE, b.tgl_update) >= CONVERT(DATE, '$date_s') 
-                                                AND CONVERT(DATE, b.tgl_update) <= CONVERT(DATE, '$date_e')
-                                            GROUP BY 
-                                                b.langganan, 
-                                                b.buyer, 
-                                                b.no_order, 
-                                                b.jenis_kain, 
-                                                b.warna, 
-                                                b.lot, 
-                                                b.rol, 
-                                                b.proses, 
-                                                b.pic_schedule,
-                                                b.bruto, 
-                                                b.buka, 
-                                                b.tgl_mulai, 
-                                                b.tgl_stop, 
-                                                b.no_mesin, 
-                                                b.petugas_buka, 
-                                                b.petugas_obras,
-                                                b.no_gerobak, 
-                                                b.leader_check, 
-                                                a.no_gerobak1, 
-                                                a.tgl_out1, 
-                                                a.no_gerobak2, 
-                                                a.tgl_out2,
-                                                a.no_gerobak3, 
-                                                a.tgl_out3, 
-                                                a.no_gerobak4, 
-                                                a.tgl_out4,
-                                                a.no_gerobak5, 
-                                                a.tgl_out5, 
-                                                a.no_gerobak6, 
-                                                a.tgl_out6
-                                            ORDER BY 
-                                                b.tgl_stop DESC
-                                        ");
+    } else if ($shift == 'ALL') {
+        $sql = sqlsrv_query($con, "SELECT
+                                    b.langganan, 
+                                    b.buyer, 
+                                    b.no_order, 
+                                    b.jenis_kain, 
+                                    b.warna, 
+                                    b.lot, 
+                                    b.rol, 
+                                    b.proses, 
+                                    b.pic_schedule,
+                                    b.bruto, 
+                                    b.buka, 
+                                    b.tgl_mulai, 
+                                    b.tgl_stop, 
+                                    b.no_mesin, 
+                                    b.petugas_buka, 
+                                    b.petugas_obras,
+                                    b.no_gerobak, 
+                                    b.leader_check, 
+                                    a.no_gerobak1, 
+                                    a.tgl_out1, 
+                                    a.no_gerobak2, 
+                                    a.tgl_out2,
+                                    a.no_gerobak3, 
+                                    a.tgl_out3, 
+                                    a.no_gerobak4, 
+                                    a.tgl_out4,
+                                    a.no_gerobak5, 
+                                    a.tgl_out5, 
+                                    a.no_gerobak6, 
+                                    a.tgl_out6
+                                FROM 
+                                    db_ikg.tbl_schedule b
+                                JOIN 
+                                    db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                                WHERE 
+                                    b.status = 'selesai' 
+                                    AND b.leader_check = 'TRUE' 
+                                    AND b.g_shift = '$group' 
+                                    AND CONVERT(DATE, b.tgl_update) >= CONVERT(DATE, '$date_s') 
+                                    AND CONVERT(DATE, b.tgl_update) <= CONVERT(DATE, '$date_e')
+                                GROUP BY 
+                                    b.langganan, 
+                                    b.buyer, 
+                                    b.no_order, 
+                                    b.jenis_kain, 
+                                    b.warna, 
+                                    b.lot, 
+                                    b.rol, 
+                                    b.proses, 
+                                    b.pic_schedule,
+                                    b.bruto, 
+                                    b.buka, 
+                                    b.tgl_mulai, 
+                                    b.tgl_stop, 
+                                    b.no_mesin, 
+                                    b.petugas_buka, 
+                                    b.petugas_obras,
+                                    b.no_gerobak, 
+                                    b.leader_check, 
+                                    a.no_gerobak1, 
+                                    a.tgl_out1, 
+                                    a.no_gerobak2, 
+                                    a.tgl_out2,
+                                    a.no_gerobak3, 
+                                    a.tgl_out3, 
+                                    a.no_gerobak4, 
+                                    a.tgl_out4,
+                                    a.no_gerobak5, 
+                                    a.tgl_out5, 
+                                    a.no_gerobak6, 
+                                    a.tgl_out6
+                                ORDER BY 
+                                    b.tgl_stop DESC
+                            ");
+    }
+}
 
-                }
-            }
+if ($sql === false) {
+    die(print_r(sqlsrv_errors(), true)); // Menampilkan error jika query gagal
+}
 
-            while ($data = sqlsrv_fetch_array($sql)) {
-                ?>
+while ($data = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
+    // Proses data di sini
+
+?>
+
             <tr>
                 <td align="left" valign="top" id="lggnan"><?php echo $data['langganan']; ?>/<?php echo $data['buyer'] ?>
                 </td>
@@ -618,31 +631,31 @@ li {
                 <td align="left" valign="top" id="No.Mc"><?php echo $data['no_mesin'] ?></td>
                 <td align="left" valign="top" id="No. Gerobak">
                     <?php if (empty($data['no_gerobak2'])) {
-                            echo strtoupper($data['no_gerobak1']);
+                            echo strtoupper($data['no_gerobak1'] ?? '');
                         } else {
                             echo strtoupper($data['no_gerobak1']) . ' + ';
                         }
                         if (empty($data['no_gerobak3'])) {
-                            echo strtoupper($data['no_gerobak2']);
+                            echo strtoupper($data['no_gerobak2'] ?? '');
                         } else {
                             echo strtoupper($data['no_gerobak2']) . ' + ';
                         }
                         if (empty($data['no_gerobak4'])) {
-                            echo strtoupper($data['no_gerobak3']);
+                            echo strtoupper($data['no_gerobak3'] ?? '');
                         } else {
                             echo strtoupper($data['no_gerobak3']) . ' + ';
                         }
                         if (empty($data['no_gerobak5'])) {
-                            echo strtoupper($data['no_gerobak4']);
+                            echo strtoupper($data['no_gerobak4'] ?? '');
                         } else {
                             echo strtoupper($data['no_gerobak4']) . ' + ';
                         }
                         if (empty($data['no_gerobak6'])) {
-                            echo strtoupper($data['no_gerobak5']);
+                            echo strtoupper($data['no_gerobak5'] ?? '');
                         } else {
                             echo strtoupper($data['no_gerobak5']) . ' + ';
                         }
-                        echo strtoupper($data['no_gerobak6']) ?>
+                        echo strtoupper($data['no_gerobak6'] ?? '')  ?>
                 </td>
 
                 <td align="left" valign="top" id="buka"><?php echo substr($data['pic_schedule'], 0, 3); ?></td>
