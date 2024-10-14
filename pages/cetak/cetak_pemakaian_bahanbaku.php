@@ -433,25 +433,33 @@ include("../../koneksi.php");
                             echo htmlspecialchars($data_roll_jasa2['ROLL']);
                         } else {
                             $productionOrderCode = db2_escape_string($rowdb21['PRODUCTIONORDERCODE']); // Escape the input
-                            $sql = "SELECT COUNT(*) AS ROLL 
-        FROM STOCKTRANSACTION s2 
-        WHERE (s2.ITEMTYPECODE ='KGF' OR s2.ITEMTYPECODE = 'KFF' OR s2.ITEMTYPECODE = 'FKG') 
-        AND s2.PRODUCTIONORDERCODE = '$productionOrderCode' 
-        GROUP BY s2.PRODUCTIONORDERCODE";
-
-                            $q_roll_tdk_gabung = db2_exec($conn1, $sql);
-
-                            if ($q_roll_tdk_gabung === false) {
-                                echo "Error executing query: " . db2_stmt_errormsg();
-                            } else {
-                                $d_roll_tdk_gabung = db2_fetch_assoc($q_roll_tdk_gabung);
-                                if ($d_roll_tdk_gabung) {
-                                    echo $roll = $d_roll_tdk_gabung['ROLL'];
-                                    $totalRollBagiKain += (int) $d_roll_tdk_gabung['ROLL'];
-                                } else {
-                                    echo "No results found.";
-                                }
+                            $q_roll_tdk_gabung = db2_exec($conn1, "SELECT
+                                                                        SUM(USERPRIMARYQUANTITY) AS KG,
+                                                                        COUNT(ITEMELEMENTCODE) AS ROLL
+                                                                    FROM
+                                                                        DB2ADMIN.STOCKTRANSACTION x
+                                                                    WHERE
+                                                                        ORDERCODE = '" . $rowdb21['PRODUCTIONORDERCODE'] . "'
+                                                                        AND (ITEMTYPECODE = 'KFF' OR ITEMTYPECODE = 'FKG')");
+                            $q_roll_tdk_gabung2 = db2_exec($conn1, "SELECT
+                                                                        count(*) AS ROLL,
+                                                                        s2.PRODUCTIONORDERCODE
+                                                                    FROM
+                                                                        STOCKTRANSACTION s2
+                                                                    WHERE
+                                                                        (s2.ITEMTYPECODE = 'KGF')
+                                                                        AND s2.PRODUCTIONORDERCODE = '$rowdb21[PRODUCTIONORDERCODE]'
+                                                                    GROUP BY
+                                                                        s2.PRODUCTIONORDERCODE");
+                            $d_roll_tdk_gabung = db2_fetch_assoc($q_roll_tdk_gabung);
+                            $d_roll_tdk_gabung2 = db2_fetch_assoc($q_roll_tdk_gabung2);
+                            if ($d_roll_tdk_gabung2['ROLL'] == "") {
+                                echo $roll = $d_roll_tdk_gabung['ROLL'];
+                                $totalRollBagiKain += $d_roll_tdk_gabung['ROLL'];
                             }
+                            echo $roll = $d_roll_tdk_gabung2['ROLL'];
+
+                            $totalRollBagiKain += $d_roll_tdk_gabung2['ROLL'];
 
                         }
                         ?>
