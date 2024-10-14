@@ -603,7 +603,7 @@ li {
                     ?>
                 <!-- Open end -->
                 <!-- time here -->
-                <td align="left" valign="top" id="Mulai"><?php if (strlen($data['tgl_mulai']) == 0) {
+                <td align="left" valign="top" id="Mulai"><?php if (strlen(cek($data['tgl_mulai'])) == 0) {
                         echo '-';
                     } else {
                         echo date('H:i', strtotime(cek($data['tgl_mulai'])));

@@ -2,6 +2,7 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
+include "utils/helper.php";
 ?>
 
 <!DOCTYPE html
@@ -326,18 +327,18 @@ include "koneksi.php";
                                 <td class="16"><?php echo $rowd['no_gerobak3'] ?></td>
                                 <td class="17"><?php echo cek($rowd['tgl_out3']); ?></td>
                                 <td class="18"><?php echo $rowd['no_gerobak4'] ?></td>
-                                <td class="19"><?php echo $rowd['tgl_out4'] ?></td>
+                                <td class="19"><?php echo cek($rowd['tgl_out4']) ?></td>
                                 <td class="20"><?php echo $rowd['no_gerobak5'] ?></td>
-                                <td class="21"><?php echo $rowd['tgl_out5'] ?></td>
+                                <td class="21"><?php echo cek($rowd['tgl_out5']) ?></td>
                                 <td class="22"><?php echo $rowd['no_gerobak6'] ?></td>
-                                <td class="23"><?php echo $rowd['tgl_out6'] ?></td>
+                                <td class="23"><?php echo cek($rowd['tgl_out6']) ?></td>
                                 <td class="24"><?php echo $rowd['id'] ?></td>
-                                <td class="25"><?php echo $rowd['create_time'] ?></td>
-                                <td class="26"><?php echo $rowd['tgl_mulai'] ?></td>
-                                <td class="27"><?php echo $rowd['tgl_update'] ?></td>
-                                <td class="28"><?php echo $rowd['tgl_stop'] ?></td>
-                                <td class="29"><?php echo $rowd['approve_time'] ?></td>
-                                <th class="30"><?php echo $rowd['petugas_buka'] ?></th>
+                                <td class="25"><?php echo cek($rowd['create_time']) ?></td>
+                                <td class="26"><?php echo cek($rowd['tgl_mulai']) ?></td>
+                                <td class="27"><?php echo cek($rowd['tgl_update']) ?></td>
+                                <td class="28"><?php echo cek($rowd['tgl_stop']) ?></td>
+                                <td class="29"><?php echo cek($rowd['approve_time']) ?></td>
+                                <th class="30"><?php echo cek($rowd['petugas_buka']) ?></th>
                                 <th class="31"><?php echo $rowd['approve_by'] ?></th>
                                 <th class="32"><?php echo $rowd['create_by'] ?></th>
                                 <th class="33"><?php echo $rowd['selesai_by'] ?></th>
