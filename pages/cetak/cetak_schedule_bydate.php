@@ -659,7 +659,7 @@ while ($data = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
                 </td>
 
                 <td align="left" valign="top" id="buka"><?php echo substr($data['pic_schedule'], 0, 3); ?></td>
-                <td align="left" valign="top" id="obras"><?php echo strtoupper(substr($data['petugas_obras'], 0, 3)); ?>
+                <td align="left" valign="top" id="obras"><?php echo strtoupper(substr($data['petugas_obras'] ?? '', 0, 3)); ?>
                 </td>
 
                 <td align="center" valign="top" id="leader check" style="font-weight: bold;"><?php
