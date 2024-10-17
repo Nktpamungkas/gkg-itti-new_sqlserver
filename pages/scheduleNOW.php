@@ -73,7 +73,7 @@ include "utils/helper.php";
             <input type="submit" value="Filter" class="btn btn-success">
         </form>
     </div>
-</div>
+
 				<div class="box-body">
 					<div style="overflow-x:auto;">
 						<table id="TableLeaderCheck" class="table table-bordered table-hover table-striped"
