@@ -534,8 +534,9 @@ include("../../koneksi.php");
 
                     // Build the SQL query string with the escaped variables
                     $sqlOut = "SELECT * FROM ITXVIEW_POSISI_KARTU_KERJA 
-                WHERE PRODUCTIONORDERCODE = '$productionOrderCode' 
-                AND OPERATIONCODE = '$operationCode'";
+                                    WHERE PRODUCTIONORDERCODE = '$productionOrderCode' 
+                                    AND OPERATIONCODE = '$operationCode'
+                                    AND SUBSTR(MULAI, 1, 10) = '$rowdb21[PROGRESSSTARTPROCESSDATE]'";
 
                     // Execute the SQL statement
                     $stmtOut = db2_exec($conn1, $sqlOut);
