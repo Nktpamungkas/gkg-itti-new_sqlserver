@@ -705,13 +705,13 @@ while ($data = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
             </tr>
         </thead>
         <?php
-    $sql = sqlsrv_query($con, "
-    SELECT TOP 1 * 
-    FROM db_ikg.tbl_footer_cetak 
-    WHERE date_start = '$date_s' 
-    AND date_end = '$date_e' 
-    AND [group] = '$group' 
-    AND shift = '$shift'
+
+    $sql = sqlsrv_query($con, "SELECT TOP 1 * 
+                                                FROM db_ikg.tbl_footer_cetak 
+                                                WHERE date_start = '$date_s' 
+                                                AND date_end = '$date_e' 
+                                                AND [group] = '$group' 
+                                                AND shift = '$shift'
 ");
 
     // Check if the query was successful
@@ -723,7 +723,7 @@ while ($data = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
 
     if ($footer === null) {
         // Handle case when no rows are returned
-        echo "No results found.";
+        echo "";
     } else {
         // Process the $footer array as needed
         // For example, print a value
