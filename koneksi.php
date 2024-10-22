@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
 date_default_timezone_set('Asia/Jakarta');
-$host = "10.0.0.174";
-$username = "ditprogram";
-$password = "Xou@RUnivV!6";
-$db_name = "TM";
-$connInfo = array("Database" => $db_name, "UID" => $username, "PWD" => $password);
-$conn = sqlsrv_connect($host, $connInfo);
+// $host = "10.0.0.174";
+// $username = "ditprogram";
+// $password = "Xou@RUnivV!6";
+// $db_name = "TM";
+// $connInfo = array("Database" => $db_name, "UID" => $username, "PWD" => $password);
+// $conn = sqlsrv_connect($host, $connInfo);
 // $con = mysqli_connect("10.0.0.10", "dit", "4dm1n", "db_ikg");
 //$con = mysqli_connect("localhost", "root", "", "db_ikg");
 // $connn = mysqli_connect("10.0.0.10", "dit", "4dm1n", "dbnow_gkg");
