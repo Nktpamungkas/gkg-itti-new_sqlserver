@@ -314,30 +314,30 @@ include "utils/helper.php";
                                         } ?><br />
                                     <?php echo $rowd['nokk_legacy']; ?>
                                 </td>
-                                <td align="center" width="20"><?php echo cek($rowd['tgl_delivery']); ?></td>
+                                <td align="center" width="20"><?php echo cek($rowd['tgl_delivery'],'Y-m-d'); ?></td>
                                 <td><i><?php echo $rowd['nokk']; ?></i><br />
                                     <i style="color:red;"><strong><?php echo $rowd['catatan']; ?></strong></i><br />
                                     <a href="#" id='<?php echo $rowd['id']; ?>' class="detail_kartu"><span
                                             class="label label-danger"><?php echo $rowd['ket_kartu']; ?></span></a>
                                 </td>
                                 <td class="12"><?php echo $rowd['no_gerobak1'] ?></td>
-                                <td class="13"><?php echo cek($rowd['tgl_out1']); ?></td>
+                                <td class="13"><?php echo cek($rowd['tgl_out1'],'Y-m-d H:i:s') ?></td>
                                 <td class="14"><?php echo $rowd['no_gerobak2'] ?></td>
-                                <td class="15"><?php echo cek($rowd['tgl_out2']); ?></td>
+                                <td class="15"><?php echo cek($rowd['tgl_out2'],'Y-m-d H:i:s') ?></td>
                                 <td class="16"><?php echo $rowd['no_gerobak3'] ?></td>
-                                <td class="17"><?php echo cek($rowd['tgl_out3']); ?></td>
+                                <td class="17"><?php echo cek($rowd['tgl_out3'],'Y-m-d H:i:s') ?></td>
                                 <td class="18"><?php echo $rowd['no_gerobak4'] ?></td>
-                                <td class="19"><?php echo cek($rowd['tgl_out4']) ?></td>
+                                <td class="19"><?php echo cek($rowd['tgl_out4'],'Y-m-d H:i:s') ?></td>
                                 <td class="20"><?php echo $rowd['no_gerobak5'] ?></td>
-                                <td class="21"><?php echo cek($rowd['tgl_out5']) ?></td>
+                                <td class="21"><?php echo cek($rowd['tgl_out5'],'Y-m-d H:i:s') ?></td>
                                 <td class="22"><?php echo $rowd['no_gerobak6'] ?></td>
-                                <td class="23"><?php echo cek($rowd['tgl_out6']) ?></td>
+                                <td class="23"><?php echo cek($rowd['tgl_out6'],'Y-m-d H:i:s') ?></td>
                                 <td class="24"><?php echo $rowd['id'] ?></td>
-                                <td class="25"><?php echo cek($rowd['create_time']) ?></td>
-                                <td class="26"><?php echo cek($rowd['tgl_mulai']) ?></td>
-                                <td class="27"><?php echo cek($rowd['tgl_update']) ?></td>
-                                <td class="28"><?php echo cek($rowd['tgl_stop']) ?></td>
-                                <td class="29"><?php echo cek($rowd['approve_time']) ?></td>
+                                <td class="25"><?php echo cek($rowd['create_time'],'Y-m-d H:i:s') ?></td>
+                                <td class="26"><?php echo cek($rowd['tgl_mulai'],'Y-m-d H:i:s') ?></td>
+                                <td class="27"><?php echo cek($rowd['tgl_update'],'Y-m-d H:i:s') ?></td>
+                                <td class="28"><?php echo cek($rowd['tgl_stop'],'Y-m-d H:i:s') ?></td>
+                                <td class="29"><?php echo cek($rowd['approve_time'],'Y-m-d H:i:s') ?></td>
                                 <th class="30"><?php echo cek($rowd['petugas_buka']) ?></th>
                                 <th class="31"><?php echo $rowd['approve_by'] ?></th>
                                 <th class="32"><?php echo $rowd['create_by'] ?></th>
