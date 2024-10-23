@@ -141,7 +141,8 @@ $sql_user = sqlsrv_query($con, "SELECT * from db_ikg.tbl_user a where a.level = 
                                                     b.no_gerobak6, b.tgl_out6, a.petugas_buka, 
                                                     a.approve_by, a.create_by, a.selesai_by
                                                 ORDER BY 
-                                                    a.no_mesin ASC, a.no_urut ASC");
+                                                    	CAST(a.no_mesin AS nVARCHAR) ASC, 
+                                                        CAST(a.no_urut AS INT) ASC");
         } else {
             $data = sqlsrv_query($con, "SELECT a.id, a.nodemand, a.no_mesin, a.no_urut, a.buyer, a.langganan, a.no_order, a.nokk, a.jenis_kain,
             a.warna, a.no_warna, sum(a.rol) as rol, sum(a.bruto) as bruto, a.proses, a.dept_tujuan, a.pic_schedule, a.status, a.lot, a.catatan, a.ket_status, a.nokk_legacy, 
@@ -158,7 +159,8 @@ $sql_user = sqlsrv_query($con, "SELECT * from db_ikg.tbl_user a where a.level = 
                     b.no_gerobak1, b.tgl_out1, b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, 
                     b.no_gerobak4, b.tgl_out4, b.no_gerobak5, b.tgl_out5, b.no_gerobak6, b.tgl_out6, 
                     a.petugas_buka, a.approve_by, a.create_by, a.selesai_by
-            ORDER by a.no_mesin ASC, a.no_urut ASC");
+            ORDER by CAST(a.no_mesin AS nVARCHAR) ASC, 
+                CAST(a.no_urut AS INT) ASC");
         }
     } else {
         unset($_SESSION['date_s'], $_SESSION['group'], $_SESSION['date_e']);
@@ -177,8 +179,8 @@ $sql_user = sqlsrv_query($con, "SELECT * from db_ikg.tbl_user a where a.level = 
         b.no_gerobak1, b.tgl_out1, b.no_gerobak2, b.tgl_out2, b.no_gerobak3, b.tgl_out3, 
         b.no_gerobak4, b.tgl_out4, b.no_gerobak5, b.tgl_out5, b.no_gerobak6, b.tgl_out6, 
         a.petugas_buka, a.approve_by, a.create_by, a.selesai_by
-        ORDER BY a.no_mesin ASC, a.no_urut ASC");
-    }
+       ORDER by CAST(a.no_mesin AS nVARCHAR) ASC, 
+                CAST(a.no_urut AS INT) ASC");
     $no = 1;
     $n = 1;
     $c = 0;
@@ -356,23 +358,23 @@ $sql_user = sqlsrv_query($con, "SELECT * from db_ikg.tbl_user a where a.level = 
                                             class="label label-danger"><?php echo $rowd['ket_kartu']; ?></span></a>
                                 </td>
                                 <td class="12"><?php echo $rowd['no_gerobak1'] ?></td>
-                                <td class="13"><?php echo cek($rowd['tgl_out1']); ?></td>
+                                <td class="13"><?php echo cek($rowd['tgl_out1'], 'y-m-d h:i:s'); ?></td>
                                 <td class="14"><?php echo $rowd['no_gerobak2'] ?></td>
-                                <td class="15"><?php echo cek($rowd['tgl_out2']); ?></td>
+                                <td class="15"><?php echo cek($rowd['tgl_out2'], 'y-m-d h:i:s'); ?></td>
                                 <td class="16"><?php echo $rowd['no_gerobak3'] ?></td>
-                                <td class="17"><?php echo cek($rowd['tgl_out3']); ?></td>
+                                <td class="17"><?php echo cek($rowd['tgl_out3'], 'y-m-d h:i:s'); ?></td>
                                 <td class="18"><?php echo $rowd['no_gerobak4'] ?></td>
-                                <td class="19"><?php echo cek($rowd['tgl_out4']); ?></td>
+                                <td class="19"><?php echo cek($rowd['tgl_out4'], 'y-m-d h:i:s'); ?></td>
                                 <td class="20"><?php echo $rowd['no_gerobak5'] ?></td>
-                                <td class="21"><?php echo cek($rowd['tgl_out5']); ?></td>
+                                <td class="21"><?php echo cek($rowd['tgl_out5'], 'y-m-d h:i:s'); ?></td>
                                 <td class="22"><?php echo $rowd['no_gerobak6'] ?></td>
-                                <td class="23"><?php echo cek($rowd['tgl_out6']); ?></td>
+                                <td class="23"><?php echo cek($rowd['tgl_out6'], 'y-m-d h:i:s'); ?></td>
                                 <td class="24"><?php echo $rowd['id'] ?></td>
-                                <td class="25"><?php echo cek($rowd['create_time']); ?></td>
-                                <td class="26"><?php echo cek($rowd['tgl_mulai']); ?></td>
-                                <td class="27"><?php echo cek($rowd['tgl_update']); ?></td>
-                                <td class="28"><?php echo cek($rowd['tgl_stop']); ?></td>
-                                <td class="29"><?php echo cek($rowd['approve_time']); ?></td>
+                                <td class="25"><?php echo cek($rowd['create_time'], 'y-m-d h:i:s'); ?></td>
+                                <td class="26"><?php echo cek($rowd['tgl_mulai'], 'y-m-d h:i:s'); ?></td>
+                                <td class="27"><?php echo cek($rowd['tgl_update'], 'y-m-d h:i:s'); ?></td>
+                                <td class="28"><?php echo cek($rowd['tgl_stop'], 'y-m-d h:i:s'); ?></td>
+                                <td class="29"><?php echo cek($rowd['approve_time'], 'y-m-d h:i:s'); ?></td>
                                 <td class="30"><?php echo $rowd['petugas_buka'] ?></td>
                                 <td class="31"><?php echo $rowd['approve_by'] ?></td>
                                 <td class="32"><?php echo $rowd['create_by'] ?></td>
