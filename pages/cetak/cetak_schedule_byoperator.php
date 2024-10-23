@@ -191,154 +191,81 @@ $operator = $_SESSION['operator'];
         <tbody>
             <?php
             if ($operator == 'ALL') {
-                $sql = sqlsrv_query($con, "SELECT 
-    b.langganan, 
-    b.buyer, 
-    b.no_order, 
-    b.jenis_kain, 
-    b.warna, 
-    b.lot, 
-    b.rol, 
-    b.proses,
-    b.bruto, 
-    b.buka, 
-    b.tgl_mulai, 
-    b.tgl_stop, 
-    b.no_mesin, 
-    b.petugas_buka, 
-    b.petugas_obras,
-    b.no_gerobak, 
-    b.leader_check, 
-    a.no_gerobak1, 
-    a.tgl_out1, 
-    a.no_gerobak2, 
-    a.tgl_out2,
-    a.no_gerobak3, 
-    a.tgl_out3, 
-    a.no_gerobak4, 
-    a.tgl_out4,
-    a.no_gerobak5, 
-    a.tgl_out5, 
-    a.no_gerobak6, 
-    a.tgl_out6
-FROM 
-    db_ikg.tbl_schedule b
-JOIN 
-    db_ikg.tbl_gerobak a ON b.id = a.id_schedule
-WHERE 
-    b.status = 'selesai' 
-    AND b.leader_check = 'TRUE' 
-    AND CAST(b.tgl_update AS DATE) BETWEEN CAST('$date_s' AS DATE) AND CAST('$date_e' AS DATE)
-GROUP BY 
-    b.langganan, 
-    b.buyer, 
-    b.no_order, 
-    b.jenis_kain, 
-    b.warna, 
-    b.lot, 
-    b.rol, 
-    b.proses,
-    b.bruto, 
-    b.buka, 
-    b.tgl_mulai, 
-    b.tgl_stop, 
-    b.no_mesin, 
-    b.petugas_buka, 
-    b.petugas_obras,
-    b.no_gerobak, 
-    b.leader_check, 
-    a.no_gerobak1, 
-    a.tgl_out1, 
-    a.no_gerobak2, 
-    a.tgl_out2,
-    a.no_gerobak3, 
-    a.tgl_out3, 
-    a.no_gerobak4, 
-    a.tgl_out4,
-    a.no_gerobak5, 
-    a.tgl_out5, 
-    a.no_gerobak6, 
-    a.tgl_out6,
-    b.no_urut
-ORDER BY 
-    b.no_mesin ASC, 
-    b.no_urut ASC
-            ");
-            } else {
-                $sql = sqlsrv_query($con, "SELECT 
-                b.langganan, 
-                b.buyer, 
-                b.no_order, 
-                b.jenis_kain, 
-                b.warna, 
-                b.lot, 
-                b.rol, 
-                b.proses,
-                b.bruto, 
-                b.buka, 
-                b.tgl_mulai, 
-                b.tgl_stop, 
-                b.no_mesin, 
-                b.petugas_buka, 
-                b.petugas_obras,
-                b.no_gerobak, 
-                b.leader_check, 
-                a.no_gerobak1, 
-                a.tgl_out1, 
-                a.no_gerobak2, 
-                a.tgl_out2,
-                a.no_gerobak3, 
-                a.tgl_out3, 
-                a.no_gerobak4, 
-                a.tgl_out4,
-                a.no_gerobak5, 
-                a.tgl_out5, 
-                a.no_gerobak6, 
-                a.tgl_out6
-            FROM 
-                db_ikg.tbl_schedule b
-            JOIN 
-                db_ikg.tbl_gerobak a ON b.id = a.id_schedule
-            WHERE 
-                b.status = 'selesai' 
-                AND b.leader_check = 'TRUE' 
-                AND b.petugas_buka = '$operator' 
-                 AND CAST(b.tgl_update AS DATE) BETWEEN CAST('$date_s' AS DATE) AND CAST('$date_e' AS DATE)
-            GROUP BY 
-            b.langganan, 
-                b.buyer, 
-                b.no_order, 
-                b.jenis_kain, 
-                b.warna, 
-                b.lot, 
-                b.rol, 
-                b.proses,
-                b.bruto, 
-                b.buka, 
-                b.tgl_mulai, 
-                b.tgl_stop, 
-                b.no_mesin, 
-                b.petugas_buka, 
-                b.petugas_obras,
-                b.no_gerobak, 
-                b.leader_check, 
-                a.no_gerobak1, 
-                a.tgl_out1, 
-                a.no_gerobak2, 
-                a.tgl_out2,
-                a.no_gerobak3, 
-                a.tgl_out3, 
-                a.no_gerobak4, 
-                a.tgl_out4,
-                a.no_gerobak5, 
-                a.tgl_out5, 
-                a.no_gerobak6, 
-                a.tgl_out6,
-                b.no_urut
-            ORDER BY 
-                b.no_mesin ASC, 
-                b.no_urut ASC");
-            }
+                $sql = sqlsrv_query($con, "SELECT
+                                                b.no_mesin,
+                                                b.no_urut,
+                                                b.langganan,
+                                                b.buyer,
+                                                b.no_order,
+                                                b.jenis_kain,
+                                                b.warna,
+                                                b.lot,
+                                                b.rol,
+                                                b.proses,
+                                                b.bruto,
+                                                b.buka,
+                                                b.tgl_mulai,
+                                                b.tgl_stop,
+                                                b.petugas_buka,
+                                                b.petugas_obras,
+                                                b.no_gerobak,
+                                                b.leader_check,
+                                                a.no_gerobak1,
+                                                a.tgl_out1,
+                                                a.no_gerobak2,
+                                                a.tgl_out2,
+                                                a.no_gerobak3,
+                                                a.tgl_out3,
+                                                a.no_gerobak4,
+                                                a.tgl_out4,
+                                                a.no_gerobak5,
+                                                a.tgl_out5,
+                                                a.no_gerobak6,
+                                                a.tgl_out6
+                                            FROM
+                                                db_ikg.tbl_schedule b
+                                            JOIN db_ikg.tbl_gerobak a ON b.id = a.id_schedule
+                                            WHERE
+                                                b.[status] = 'selesai'
+                                                AND b.leader_check = 'TRUE'
+                                                AND CAST(b.tgl_update AS date) >= '$date_s' 
+                                                AND CAST(b.tgl_update AS date) <= '$date_e'
+                                            GROUP BY
+                                                b.no_mesin,
+                                                b.no_urut,
+                                                b.langganan,
+                                                b.buyer,
+                                                b.no_order,
+                                                b.jenis_kain,
+                                                b.warna,
+                                                b.lot,
+                                                b.rol,
+                                                b.proses,
+                                                b.bruto,
+                                                b.buka,
+                                                b.tgl_mulai,
+                                                b.tgl_stop,
+                                                b.no_mesin,
+                                                b.petugas_buka,
+                                                b.petugas_obras,
+                                                b.no_gerobak,
+                                                b.leader_check,
+                                                a.no_gerobak1,
+                                                a.tgl_out1,
+                                                a.no_gerobak2,
+                                                a.tgl_out2,
+                                                a.no_gerobak3,
+                                                a.tgl_out3,
+                                                a.no_gerobak4,
+                                                a.tgl_out4,
+                                                a.no_gerobak5,
+                                                a.tgl_out5,
+                                                a.no_gerobak6,
+                                                a.tgl_out6
+                                            ORDER BY
+                                                CAST(b.no_mesin AS nVARCHAR) ASC, 
+                                                CAST(b.no_urut AS INT) ASC");
+                                                        }
 
             while ($data = sqlsrv_fetch_array($sql)) {
                 result:
