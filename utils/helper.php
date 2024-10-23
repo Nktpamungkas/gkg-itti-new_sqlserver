@@ -37,5 +37,28 @@ function cek_input($key)
     }
 }
 
+/** Contoh penggunaan
+ * 
+ * $input = "apple, banana, orange, apple, banana";
+ * $result = removeDuplicatesFromString($input);
+ * echo $result; // Output: "apple, banana, orange"
+ *
+ **/
+function removeDuplicatesFromString($input) {
+    // Memeriksa apakah string mengandung koma
+    if (strpos($input, ',') !== false) {
+        // Mengonversi string menjadi array
+        $array = explode(',', $input);
+        
+        // Menghapus spasi di awal dan akhir setiap elemen dan menghapus duplikat
+        $array = array_map('trim', $array);
+        $array = array_unique($array);
+        
+        // Menggabungkan kembali array menjadi string
+        return implode(', ', $array);
+    }
+    return $input; // Jika tidak ada koma, kembalikan string asli
+}
+
 
 ?>

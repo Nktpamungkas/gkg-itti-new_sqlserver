@@ -146,56 +146,56 @@ include "utils/helper.php";
 								<?php
 								$no = 1;
 
-								$sql1 = sqlsrv_query($connn, "WITH AggregatedData AS (
-																			SELECT
-																				tglkeluar,
-																				buyer,
-																				custumer,
-																				projectcode,
-																				prod_order,
-																				demand,
-																				code,
-																				STRING_AGG(LTRIM(RTRIM(lot)), ' ') AS lot,
-																				benang1,
-																				benang2,
-																				benang3,
-																				benang4,
-																				warna,
-																				jenis_kain,
-																				SUM(qty) AS qty,
-																				SUM(berat) AS berat,
-																				proj_awal,
-																				ket,
-																				STRING_AGG(LTRIM(RTRIM(userid)), ' ') AS userid,
-																				DATEDIFF(DAY, tglkeluar, GETDATE()) AS sisa,
-																				tgl_tutup
-																			FROM
-																				dbnow_gkg.tblkeluarkain 
-																			WHERE
-																				tgl_tutup = '$selected_date'
-																				AND demand IS NOT NULL
-																			GROUP BY
-																				tglkeluar,
-																				buyer,
-																				custumer,
-																				projectcode,
-																				prod_order,
-																				demand,
-																				code,
-																				benang1,
-																				benang2,
-																				benang3,
-																				benang4,
-																				warna,
-																				jenis_kain,
-																				proj_awal,
-																				ket,
-																				tgl_tutup
-																		)
+								$sql1 = sqlsrv_query($connn, "SELECT *,
+																				ROW_NUMBER() OVER (ORDER BY tgl_tutup DESC, id DESC) AS rn
+																			FROM (
+																				SELECT
+																					tglkeluar,
+																					buyer,
+																					custumer,
+																					projectcode,
+																					prod_order,
+																					demand,
+																					code,
+																					STRING_AGG(TRIM(lot), ', ') AS lot,
+																					benang1,
+																					benang2,
+																					benang3,
+																					benang4,
+																					warna,
+																					jenis_kain,
+																					SUM(qty) AS qty,
+																					SUM(berat) AS berat,
+																					proj_awal,
+																					ket,
+																					STRING_AGG(TRIM(userid), ', ') AS userid,
+																					DATEDIFF(DAY, tglkeluar, GETDATE()) AS sisa,
+																					MAX(tgl_tutup) AS tgl_tutup,  -- Memastikan tgl_tutup valid
+																					MAX(id) AS id  -- Pastikan untuk mengambil id, jika ini kolom yang relevan
+																				FROM
+																					dbnow_gkg.tblkeluarkain 
+																				WHERE
+																					tgl_tutup = '$selected_date'
+																					AND demand IS NOT NULL
+																				GROUP BY
+																					tglkeluar,
+																					buyer,
+																					custumer,
+																					projectcode,
+																					prod_order,
+																					demand,
+																					code,
+																					benang1,
+																					benang2,
+																					benang3,
+																					benang4,
+																					warna,
+																					jenis_kain,
+																					proj_awal,
+																					ket
+																			) AS AggregatedData
+																			ORDER BY rn;  -- Mengurutkan berdasarkan nomor baris
 
-																		SELECT *,
-																			ROW_NUMBER() OVER (ORDER BY tgl_tutup DESC) AS rn  -- Removed id from ORDER BY
-																		FROM AggregatedData
 								");
 								while ($r = sqlsrv_fetch_array($sql1)) {
 
@@ -300,7 +300,7 @@ include "utils/helper.php";
 												<font size="-1"><?= $r['code']; ?></font>
 											</td>
 											<td align="center">
-												<font size="-1"><?= $r['lot']; ?></font>
+												<font size="-1"><?= removeDuplicatesFromString($r['lot']); ?></font>
 											</td>
 											<td align="center">
 												<font size="-1"><?= $r['benang1']; ?></font>
@@ -333,7 +333,7 @@ include "utils/helper.php";
 												<font size="-1"><?= $r['ket']; ?></font>
 											</td>
 											<td align="center">
-												<font size="-1"><?= $r['userid']; ?></font>
+												<font size="-1"><?= removeDuplicatesFromString($r['userid']); ?></font>
 											</td>
 										</tr>
 										<?php
