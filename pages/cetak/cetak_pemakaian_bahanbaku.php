@@ -593,18 +593,19 @@ include("../../koneksi.php");
                     ?>
 
                     <td align="center" valign="top" colspan="2">
-                        <?php echo !empty($beratkain['beratkain']) ? $beratkain = $beratkain['beratkain'] : $beratkain = 0; ?>
+                        <?= !empty($beratkain['beratkain']) ? htmlspecialchars($beratkain['beratkain']) : 0; ?>
                     </td>
-                    <td align="left" valign="top"><?= round($qtyproses - $beratkain, 2); ?></td>
-                    <td align="left" valign="top"><?= $rowOut['OPERATIONCODE']; ?></td>
-                    <td align="left" valign="top"><?= $rowOut['MULAI']; ?></td>
-                    <td align="left" valign="top"><?= $rowOut['SELESAI']; ?></td>
-                    <td align="left" valign="top"><?= $rowOut['WORKCENTERCODE']; ?></td>
-                    <td align="left" valign="top"><?= $rowOut['GEROBAK']; ?></td>
-                    <td align="left" valign="top"><?= $gerobakselesai['gabungan_no_gerobak']; ?></td>
-                    <td align="center" valign="top"><?= $rowOut['OP1']; ?></td>
-                    <td align="center" valign="top"><?= $rowOut['OP2']; ?></td>
-                    <td align="center" valign="top"><?= $_SESSION['nama1Gkg']; ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars(round($qtyproses - $beratkain['beratkain'], 2)); ?>
+                    </td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['OPERATIONCODE'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['MULAI'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['SELESAI'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['WORKCENTERCODE'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['GEROBAK'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars($gabungan_no_gerobak); ?></td>
+                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP1']); ?></td>
+                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP2'] ?? ''); ?></td>
+                    <td align="center" valign="top"><?= htmlspecialchars($_SESSION['nama1Gkg'] ?? ''); ?></td>
                 </tr>
             <?php endwhile; ?>
 
