@@ -602,7 +602,7 @@ include("../../koneksi.php");
                     <td align="left" valign="top"><?= htmlspecialchars($rowOut['SELESAI'] ?? ''); ?></td>
                     <td align="left" valign="top"><?= htmlspecialchars($rowOut['WORKCENTERCODE'] ?? ''); ?></td>
                     <td align="left" valign="top"><?= htmlspecialchars($rowOut['GEROBAK'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($gabungan_no_gerobak); ?></td>
+                    <td align="left" valign="top"><?= htmlspecialchars( $gerobakselesai['gabungan_no_gerobak'] ?? ''); ?></td>
                     <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP1']); ?></td>
                     <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP2'] ?? ''); ?></td>
                     <td align="center" valign="top"><?= htmlspecialchars($_SESSION['nama1Gkg'] ?? ''); ?></td>
