@@ -558,66 +558,53 @@ include("../../koneksi.php");
                     <?php
                     // Assuming you have a connection to SQL Server established as $conr
                 
-                    $sqlgerobak = "SELECT DISTINCT no_demand, prod_order, bagi_kain, berat, berat_kosong, SUM(berat - berat_kosong) AS beratkain 
-                FROM kain_proses 
-                WHERE prod_order = @prod_order AND proses = @proses AND no_step = @no_step
-                GROUP BY no_demand, prod_order, bagi_kain, berat, berat_kosong";
-
-                    $stmtGerobak = sqlsrv_prepare($conr, $sqlgerobak, array(
-                        array('@prod_order', $rowOut['PRODUCTIONORDERCODE'], SQLSRV_PARAM_IN),
-                        array('@proses', $rowOut['OPERATIONCODE'], SQLSRV_PARAM_IN),
-                        array('@no_step', $rowOut['STEPNUMBER'], SQLSRV_PARAM_IN)
-                    ));
-
-                    if ($stmtGerobak) {
-                        sqlsrv_execute($stmtGerobak);
-                        $beratkain = sqlsrv_fetch_array($stmtGerobak, SQLSRV_FETCH_ASSOC);
-                    } else {
-                        // Handle the error
-                        die(print_r(sqlsrv_errors(), true));
-                    }
+                    $sqlgerobak = "SELECT DISTINCT
+                                                    no_demand,
+                                                    prod_order,
+                                                    bagi_kain,
+                                                    berat,
+                                                    berat_kosong,
+                                                    SUM(berat - berat_kosong) AS beratkain
+                                                FROM
+                                                    `kain_proses` 
+                                                WHERE
+                                                    prod_order ='$rowOut[PRODUCTIONORDERCODE]' 
+                                                AND 
+                                                    proses ='$rowOut[OPERATIONCODE]' 
+                                                AND 
+                                                    no_step ='$rowOut[STEPNUMBER]' ";
+                    $gerobak = mysqli_query($conr, $sqlgerobak);
+                    $beratkain = mysqli_fetch_assoc($gerobak);
                     ?>
 
 
                     <?php
-                    // Prepare your SQL statement
-                    $sqlgerobakselesai = "SELECT STRING_AGG(DISTINCT no_gerobak, ', ') AS gabungan_no_gerobak 
-                      FROM dbnow_gerobak.kain_proses 
-                      WHERE prod_order = ? AND proses = ? AND no_step = ?";
+                    $sqlgerobakselesai = "SELECT
+                                                GROUP_CONCAT(DISTINCT no_gerobak SEPARATOR ', ') AS gabungan_no_gerobak
+                                            FROM
+                                                kain_proses 
+                                            WHERE
+                                                prod_order = '$rowOut[PRODUCTIONORDERCODE]' 
+                                                AND proses='$rowOut[OPERATIONCODE]'
+                                                AND no_step='$rowOut[STEPNUMBER]'";
 
-                    // Prepare the statement
-                    $stmtGerobakSelesai = sqlsrv_prepare($conr, $sqlgerobakselesai, array($rowOut['PRODUCTIONORDERCODE'], $rowOut['OPERATIONCODE'], $rowOut['STEPNUMBER']));
-
-                    // Execute the statement
-                    if (sqlsrv_execute($stmtGerobakSelesai)) {
-                        // Fetch the result
-                        $gerobakselesai = sqlsrv_fetch_array($stmtGerobakSelesai, SQLSRV_FETCH_ASSOC);
-                    }
-
-                    // Now you can access the result
-                    if ($gerobakselesai) {
-                        $gabungan_no_gerobak = $gerobakselesai['gabungan_no_gerobak'] ?? '';
-                        // Do something with $gabungan_no_gerobak
-                    } else {
-                        // Handle the case where no results were returned
-                        $gabungan_no_gerobak = '';
-                    }
+                    $gerobakss = mysqli_query($conr, $sqlgerobakselesai);
+                    $gerobakselesai = mysqli_fetch_assoc($gerobakss);
                     ?>
 
                     <td align="center" valign="top" colspan="2">
-                        <?= !empty($beratkain['beratkain']) ? htmlspecialchars($beratkain['beratkain']) : 0; ?>
+                        <?php echo !empty($beratkain['beratkain']) ? $beratkain = $beratkain['beratkain'] : $beratkain = 0; ?>
                     </td>
-                    <td align="left" valign="top"><?= htmlspecialchars(round($qtyproses - $beratkain['beratkain'], 2)); ?>
-                    </td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['OPERATIONCODE'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['MULAI'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['SELESAI'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['WORKCENTERCODE'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($rowOut['GEROBAK'] ?? ''); ?></td>
-                    <td align="left" valign="top"><?= htmlspecialchars($gabungan_no_gerobak); ?></td>
-                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP1']); ?></td>
-                    <td align="center" valign="top"><?= htmlspecialchars($rowOut['OP2'] ?? ''); ?></td>
-                    <td align="center" valign="top"><?= htmlspecialchars($_SESSION['nama1Gkg'] ?? ''); ?></td>
+                    <td align="left" valign="top"><?= round($qtyproses - $beratkain, 2); ?></td>
+                    <td align="left" valign="top"><?= $rowOut['OPERATIONCODE']; ?></td>
+                    <td align="left" valign="top"><?= $rowOut['MULAI']; ?></td>
+                    <td align="left" valign="top"><?= $rowOut['SELESAI']; ?></td>
+                    <td align="left" valign="top"><?= $rowOut['WORKCENTERCODE']; ?></td>
+                    <td align="left" valign="top"><?= $rowOut['GEROBAK']; ?></td>
+                    <td align="left" valign="top"><?= $gerobakselesai['gabungan_no_gerobak']; ?></td>
+                    <td align="center" valign="top"><?= $rowOut['OP1']; ?></td>
+                    <td align="center" valign="top"><?= $rowOut['OP2']; ?></td>
+                    <td align="center" valign="top"><?= $_SESSION['nama1Gkg']; ?></td>
                 </tr>
             <?php endwhile; ?>
 
