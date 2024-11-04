@@ -11,7 +11,7 @@ include "utils/helper.php";
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="180">
+    <!-- <meta http-equiv="refresh" content="180"> -->
     <title>Home</title>
     <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
     <script src="plugins/highcharts/code/highcharts.js"></script>
@@ -471,6 +471,48 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                     <td><?php echo cek($np['tgl_masuk'],'Y-m-d') ?></td>
                                     <td><?php echo $np['jml_bruto'] ?></td>
                                     <td><?php echo $np['jml_rol'] ?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+        <div class="container col-md-6">
+            <div class="box box-success">
+                <div class="box-header ui-sortable-handle" style="cursor: move;">
+                    <h4><i class="fa fa-dashboard"></i> Jumlah Buka kain dan Belah kain </h4>
+
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered" id="Table1">
+                        <thead>
+                            <tr class="bg-danger">
+                                <th>Tgl Masuk</th>
+                                <th>Jumlah KG</th>
+                                <!-- <th>Jumlah Roll</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $query_total_bukabelahkain = sqlsrv_query($con,"SELECT
+                                                                                TOP 12 date_laporan,
+                                                                                SUM(
+                                                                                    belah_kain_s1 + belah_kain_s2 + belah_kain_s3 + buka_kain_s1 + buka_kain_s2 + buka_kain_s3
+                                                                                ) AS total
+                                                                            FROM
+                                                                                db_ikg.tbl_laporanharian
+                                                                            GROUP BY
+                                                                                date_laporan
+                                                                            ORDER BY
+                                                                                date_laporan DESC;");
+                            while ($tb = sqlsrv_fetch_array($query_total_bukabelahkain)) {
+                            ?>
+                                <tr>
+                                    <td><?php echo cek($tb['date_laporan'],'Y-m-d') ?></td>
+                                    <td><?php echo $tb['total'] ?></td>
+
                                 </tr>
                             <?php } ?>
                         </tbody>
