@@ -489,7 +489,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                     <table class="table table-bordered" id="Table1">
                         <thead>
                             <tr class="bg-danger">
-                                <th>Tgl Masuk</th>
+                                <th>Tanggal</th>
                                 <th>Jumlah KG</th>
                                 <!-- <th>Jumlah Roll</th> -->
                             </tr>
