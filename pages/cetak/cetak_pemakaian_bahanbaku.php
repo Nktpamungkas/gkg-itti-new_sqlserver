@@ -401,33 +401,35 @@ include("../../koneksi.php");
                         $productionDemandCode = $rowdb21['PRODUCTIONDEMANDCODE'];
                         if (substr($rowdb21['PRO_ORDER'] ?? '', 0, 3) === 'CWD') {
                             $q_roll_jasa = db2_exec($conn1, "SELECT s.ABSUNIQUEID 
-                                                    FROM PRODUCTIONDEMAND p 
-                                                    LEFT JOIN SALESORDERLINE s ON s.SALESORDERCODE = p.ORIGDLVSALORDLINESALORDERCODE 
-                                                    AND s.ORDERLINE = p.ORIGDLVSALORDERLINEORDERLINE 
-                                                    WHERE p.CODE = ?", [$productionDemandCode]);
+                                                                FROM PRODUCTIONDEMAND p 
+                                                                LEFT JOIN SALESORDERLINE s ON s.SALESORDERCODE = p.ORIGDLVSALORDLINESALORDERCODE 
+                                                                AND s.ORDERLINE = p.ORIGDLVSALORDERLINEORDERLINE 
+                                                                WHERE p.CODE = '$productionDemandCode'");
 
                             $data_roll_jasa = db2_fetch_assoc($q_roll_jasa);
                             $absUniqueId = $data_roll_jasa['ABSUNIQUEID'];
 
-                            $q_roll_jasa2 = db2_exec($conn1, "SELECT UNIQUEID, SUBSTR(ROLL, 1,2) AS ROLL 
-                                                    FROM (
-                                                        SELECT UNIQUEID, 
-                                                               CASE WHEN LOCATE('(', VALUESTRING) > 0 
-                                                                        AND LOCATE(')', VALUESTRING) > 0 
-                                                               THEN SUBSTRING(VALUESTRING, LOCATE('(', VALUESTRING) + 1, LOCATE(')', VALUESTRING) - LOCATE('(', VALUESTRING) - 1)
-                                                               END AS ROLL 
-                                                        FROM ADSTORAGE 
-                                                        WHERE NAMENAME = 'ColorRemarks' 
-                                                        AND VALUESTRING LIKE '%ROLL%' 
-                                                        AND UNIQUEID = ? 
-                                                        AND NOT CASE 
-                                                                WHEN LOCATE('(', VALUESTRING) > 0 
-                                                                     AND LOCATE(')', VALUESTRING) > 0 
+                            if($absUniqueId){
+                                $q_roll_jasa2 = db2_exec($conn1, "SELECT UNIQUEID, SUBSTR(ROLL, 1,2) AS ROLL 
+                                                        FROM (
+                                                            SELECT UNIQUEID, 
+                                                                CASE WHEN LOCATE('(', VALUESTRING) > 0 
+                                                                            AND LOCATE(')', VALUESTRING) > 0 
                                                                 THEN SUBSTRING(VALUESTRING, LOCATE('(', VALUESTRING) + 1, LOCATE(')', VALUESTRING) - LOCATE('(', VALUESTRING) - 1)
-                                                        END IS NULL", [$absUniqueId]);
+                                                                END AS ROLL 
+                                                            FROM ADSTORAGE 
+                                                            WHERE NAMENAME = 'ColorRemarks' 
+                                                            AND VALUESTRING LIKE '%ROLL%' 
+                                                            AND UNIQUEID = '$absUniqueId'
+                                                            AND NOT CASE 
+                                                                    WHEN LOCATE('(', VALUESTRING) > 0 
+                                                                        AND LOCATE(')', VALUESTRING) > 0 
+                                                                    THEN SUBSTRING(VALUESTRING, LOCATE('(', VALUESTRING) + 1, LOCATE(')', VALUESTRING) - LOCATE('(', VALUESTRING) - 1)
+                                                            END IS NULL)");
 
-                            $data_roll_jasa2 = db2_fetch_assoc($q_roll_jasa2);
-                            echo htmlspecialchars($data_roll_jasa2['ROLL']);
+                                $data_roll_jasa2 = db2_fetch_assoc($q_roll_jasa2);
+                                echo $result = !empty($data_roll_jasa2['ROLL']) ? htmlspecialchars($data_roll_jasa2['ROLL']) : '-';
+                            }
                         } else {
                             $productionOrderCode = db2_escape_string($rowdb21['PRODUCTIONORDERCODE']); // Escape the input
                             $q_roll_tdk_gabung = db2_exec($conn1, "SELECT
