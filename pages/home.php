@@ -608,7 +608,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
         <div class="container col-md-4">
             <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-dashboard"></i> Output Harian Operator Buka Kain <?php echo date('F Y') ?></h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Harian Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
@@ -631,8 +631,8 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                     <td><?php echo $no++; ?></td>
                                     <td><?php echo $ten['Operator'] ?></td>
                                     <td align="center"><?php echo $ten['Jumlah_Order'] ?></td>
-                                    <td align="center"><?php echo $ten['Total_Roll'] ?></td>
-                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'],2) ?></td>
+                                    <td align="center"><?php echo $ten['Total_Roll'] ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'],2) ?> Kg</td>
                                 </tr>
                             <?php endforeach;?>
                         </tbody>
@@ -644,7 +644,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
         <div class="container col-md-4">
             <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-dashboard"></i> Output Harian Per Shift Operator Buka Kain <?php echo date('F Y') ?></h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Harian Per Shift Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
@@ -671,8 +671,8 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                     <td><?php echo $ten['Operator']; ?></td>
                                     <td align="center"><?php echo $ten['Shift']; ?></td>
                                     <td align="center"><?php echo $ten['Jumlah_Order']; ?></td>
-                                    <td align="right"><?php echo $ten['Total_Roll']; ?></td>
-                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?></td>
+                                    <td align="center"><?php echo $ten['Total_Roll']; ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?> Kg</td>
                                 </tr>
                             <?php
                                 endforeach;
@@ -693,7 +693,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
         <div class="container col-md-4">
             <div class="box box-warning">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-sticky-note-o" aria-hidden="true"></i> Output Harian Per Shift Tidak Full Operator Buka Kain <?php echo date('F Y') ?></h4>
+                    <h4><i class="fa fa-sticky-note-o" aria-hidden="true"></i> Output Harian Shift Tidak Full Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
@@ -712,7 +712,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                             $no = 1;
                             $hariSekarang = date('N');
 
-                            if ($hariSekarang >= 5):
+                            if ($hariSekarang > 5):
                                 foreach($summary_tidakfull as $ten):
                             ?>
                                 <tr>
@@ -720,8 +720,8 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                     <td><?php echo $ten['Operator']; ?></td>
                                     <td align="center"><?php echo $ten['Shift']; ?></td>
                                     <td align="center"><?php echo $ten['Jumlah_Order']; ?></td>
-                                    <td align="right"><?php echo $ten['Total_Roll']; ?></td>
-                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?></td>
+                                    <td align="right"><?php echo $ten['Total_Roll']; ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?> Kg</td>
                                 </tr>
                             <?php
                                 endforeach;
@@ -745,7 +745,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
         <div class="container col-md-6">
             <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-dashboard"></i> Output Bulanan Operator Buka Kain</h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Bulanan Operator Buka Kain <?php echo date('F Y') ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
@@ -769,7 +769,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                     <td><?php echo $np['Operator'] ?></td>
                                     <td align='center'><?php echo $np['Jumlah_Order'] ?></td>
                                     <td align='center'><?php echo $np['Total_Roll'] ?></td>
-                                    <td align='right'><?php echo number_format($np['Total_Bagi_Kain'],2) ?></td>
+                                    <td align='right'><?php echo number_format($np['Total_Bagi_Kain'],2) ?> Kg</td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
