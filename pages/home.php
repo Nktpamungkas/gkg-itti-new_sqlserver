@@ -11,7 +11,7 @@ include "utils/helper.php";
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="180">
+    <!-- <meta http-equiv="refresh" content="180"> -->
     <title>Home</title>
     <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
     <script src="plugins/highcharts/code/highcharts.js"></script>
@@ -69,9 +69,252 @@ include "utils/helper.php";
 </head>
 
 <?php
-$eleven_2dayago = date('Y-m-d', strtotime("-2 days")) . ' 07:00';
-$eleven_ystrdy = date('Y-m-d', strtotime("-1 days")) . ' 07:00';
-$eleven_today = date('Y-m-d') . ' 07:00';
+    $first_month = date('Y-m-01');
+    $end_month = date('Y-m-t');
+    $first_month_next = date('Y-m-01', strtotime('first day of next month'));
+
+    function normalizeDate($tanggal){
+        if ($tanggal instanceof DateTime) {
+            return $tanggal->format('Y-m-d H:i:s');
+        }
+        if (is_array($tanggal) && isset($tanggal['date'])) {
+            return date('Y-m-d H:i:s', strtotime($tanggal['date']));
+        }
+        if (is_string($tanggal)) {
+            return $tanggal;
+        }
+        return null;
+    }
+
+    function getProductionBase(): int{
+            $now = time();
+            $today07 = strtotime('today 07:00');
+            if ($now < $today07) {
+                return strtotime('yesterday 07:00');
+            }
+            return $today07;
+    }
+
+    function summary_perday(array $data): array {
+        $start = getProductionBase();
+        $end = strtotime('+1 day', $start);
+        $summary = [];
+
+        foreach ($data as $d) {
+            $tanggalStr = normalizeDate($d['Tanggal']);
+            if (!$tanggalStr) continue;
+            $tgl = strtotime($tanggalStr);
+
+            if ($tgl >= $start && $tgl < $end) {
+                $op = $d['Operator'];
+                if (!isset($summary[$op])) {
+                    $summary[$op] = [
+                        'Operator' => $op,
+                        'Tanggal' => date('Y-m-d', $start),
+                        'Total_Roll' => 0,
+                        'Total_Bagi_Kain' => 0,
+                        'Jumlah_Order' => 0
+                    ];
+                }
+                $summary[$op]['Total_Roll'] += $d['Jml_Roll'];
+                $summary[$op]['Total_Bagi_Kain'] += $d['Bagi_Kain'];
+                $summary[$op]['Jumlah_Order']++;
+            }
+        }
+
+        return array_values($summary);
+    }
+
+    function summary_pershift(array $data): array {
+        $base = getProductionBase();
+        $summary = [];
+        $shifts = [
+            'Shift 1' => ['start' => $base, 'end' => strtotime('+8 hours', $base)], // 07:00–15:00
+            'Shift 2' => ['start' => strtotime('+8 hours', $base), 'end' => strtotime('+15 hours', $base)], // 15:00–22:00
+            'Shift 3' => ['start' => strtotime('+15 hours', $base), 'end' => strtotime('+24 hours', $base)], // 22:00–07:00 (besok)
+        ];
+        $ordered_shifts = ['Shift 1', 'Shift 2', 'Shift 3'];
+
+        foreach ($ordered_shifts as $shift_name) {
+            $range = $shifts[$shift_name];
+            foreach ($data as $d) {
+                $tanggalStr = normalizeDate($d['Tanggal']);
+                if (!$tanggalStr) continue;
+                $tgl = strtotime($tanggalStr);
+
+                if ($tgl >= $range['start'] && $tgl < $range['end']) {
+                    $op = $d['Operator'];
+                    if (!isset($summary[$shift_name][$op])) {
+                        $summary[$shift_name][$op] = [
+                            'Operator' => $op,
+                            'Shift' => $shift_name,
+                            'Tanggal' => date('Y-m-d', $base),
+                            'Total_Roll' => 0,
+                            'Total_Bagi_Kain' => 0,
+                            'Jumlah_Order' => 0
+                        ];
+                    }
+                    $summary[$shift_name][$op]['Total_Roll'] += $d['Jml_Roll'];
+                    $summary[$shift_name][$op]['Total_Bagi_Kain'] += $d['Bagi_Kain'];
+                    $summary[$shift_name][$op]['Jumlah_Order']++;
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($ordered_shifts as $shift_name) {
+            if (!empty($summary[$shift_name])) {
+                foreach ($summary[$shift_name] as $row) {
+                    $result[] = $row;
+                }
+            }
+        }
+        return $result;
+    }
+
+    function summary_tidakfull(array $data): array {
+        $base = getProductionBase();
+        $summary = [];
+        $shifts = [
+            'Shift 1 (Tidak Full)' => ['start' => $base, 'end' => strtotime('+4 hours', $base)],      
+            'Shift 2 (Tidak Full)' => ['start' => strtotime('+8 hours', $base), 'end' => strtotime('+13 hours', $base)], 
+            'Shift 3 (Tidak Full)' => ['start' => strtotime('+15 hours', $base), 'end' => strtotime('+22 hours', $base)],
+        ];
+        $ordered_shifts = ['Shift 1 (Tidak Full)', 'Shift 2 (Tidak Full)', 'Shift 3 (Tidak Full)'];
+
+        foreach ($ordered_shifts as $shift_name) {
+            $range = $shifts[$shift_name];
+            foreach ($data as $d) {
+                $tanggalStr = normalizeDate($d['Tanggal']);
+                if (!$tanggalStr) continue;
+                $tgl = strtotime($tanggalStr);
+
+                if ($tgl >= $range['start'] && $tgl < $range['end']) {
+                    $op = $d['Operator'];
+                    if (!isset($summary[$shift_name][$op])) {
+                        $summary[$shift_name][$op] = [
+                            'Operator' => $op,
+                            'Shift' => $shift_name,
+                            'Tanggal' => date('Y-m-d', $base),
+                            'Total_Roll' => 0,
+                            'Total_Bagi_Kain' => 0,
+                            'Jumlah_Order' => 0
+                        ];
+                    }
+                    $summary[$shift_name][$op]['Total_Roll'] += $d['Jml_Roll'];
+                    $summary[$shift_name][$op]['Total_Bagi_Kain'] += $d['Bagi_Kain'];
+                    $summary[$shift_name][$op]['Jumlah_Order']++;
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($ordered_shifts as $shift_name) {
+            if (!empty($summary[$shift_name])) {
+                foreach ($summary[$shift_name] as $row) {
+                    $result[] = $row;
+                }
+            }
+        }
+        return $result;
+    }
+
+    function summary_perbulan(array $data): array {
+        date_default_timezone_set('Asia/Jakarta');
+
+        $start = strtotime(date('Y-m-01 07:00:00'));
+        $end = strtotime(date('Y-m-01 07:00:00', strtotime('first day of next month')));
+
+        $summary = [];
+
+        foreach ($data as $d) {
+            $tanggalStr = normalizeDate($d['Tanggal']);
+            if (!$tanggalStr) continue;
+            $tgl = strtotime($tanggalStr);
+
+            if ($tgl >= $start && $tgl < $end) {
+                $op = $d['Operator'];
+                if (!isset($summary[$op])) {
+                    $summary[$op] = [
+                        'Operator' => $op,
+                        'Periode' => date('F Y', $start),
+                        'Total_Roll' => 0,
+                        'Total_Bagi_Kain' => 0,
+                        'Jumlah_Order' => 0
+                    ];
+                }
+                $summary[$op]['Total_Roll'] += $d['Jml_Roll'];
+                $summary[$op]['Total_Bagi_Kain'] += $d['Bagi_Kain'];
+                $summary[$op]['Jumlah_Order']++;
+            }
+        }
+
+        return array_values($summary);
+    }
+
+    function summary_total_produksi(array $data): array {
+        $base = getProductionBase();
+
+        $today_start = $base;
+        $today_end   = strtotime('+1 day', $today_start);
+
+        $yesterday_start = strtotime('-1 day', $today_start);
+        $yesterday_end   = $today_start;
+
+        $total = [
+            'Total_Berat_Hari_Ini' => 0,
+            'Total_Roll_Hari_Ini'  => 0,
+            'Total_Berat_Kemarin'  => 0,
+            'Total_Roll_Kemarin'   => 0
+        ];
+
+        foreach ($data as $d) {
+            $tanggalStr = normalizeDate($d['Tanggal']);
+            if (!$tanggalStr) continue;
+            $tgl = strtotime($tanggalStr);
+
+            if ($tgl >= $today_start && $tgl < $today_end) {
+                $total['Total_Berat_Hari_Ini'] += (float)($d['Bagi_Kain'] ?? 0);
+                $total['Total_Roll_Hari_Ini']  += (int)($d['Jml_Roll'] ?? 0);
+            }
+
+            if ($tgl >= $yesterday_start && $tgl < $yesterday_end) {
+                $total['Total_Berat_Kemarin'] += (float)($d['Bagi_Kain'] ?? 0);
+                $total['Total_Roll_Kemarin']  += (int)($d['Jml_Roll'] ?? 0);
+            }
+        }
+
+        $total['Periode_Hari_Ini'] = date('Y-m-d', $today_start) . ' s/d ' . date('Y-m-d', $today_end);
+        $total['Periode_Kemarin']  = date('Y-m-d', $yesterday_start) . ' s/d ' . date('Y-m-d', $yesterday_end);
+
+        return $total;
+    }
+
+    $data = [];
+    $query_tenseries = sqlsrv_query($con,"SELECT
+                                            *
+                                        FROM
+                                            db_ikg.tbl_sync_greige t
+                                        WHERE
+                                            t.TANGGAL BETWEEN '$first_month 07:00:00' AND '$first_month_next 07:00:00'");
+        while ($ten = sqlsrv_fetch_array($query_tenseries)) {
+                $data[] = [
+                                'Id' => $ten['ABSUNIQUEID'],
+                                'Operator' => $ten['OPERATOR'],
+                                'Production_Order' => $ten['PRODUCTIONORDER'],
+                                'Jml_Roll' => $ten['ROLL'],
+                                'Bagi_Kain' => $ten['BAGIKAIN'],
+                                'Tanggal' => $ten['TANGGAL']
+                            ];
+        }
+        $summary_perday = summary_perday($data);
+        $summary_pershift = summary_pershift($data);
+        $summary_tidakfull = summary_tidakfull($data);
+        $summary_perbulan = summary_perbulan($data);
+        $rekap = summary_total_produksi($data);
+        $eleven_2dayago = date('Y-m-d', strtotime("-2 days")) . ' 07:00';
+        $eleven_ystrdy = date('Y-m-d', strtotime("-1 days")) . ' 07:00';
+        $eleven_today = date('Y-m-d') . ' 07:00';
 
 $todayQty = sqlsrv_query($con,"SELECT sum(bruto) as sumqty from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update as DATETIME) <= '$eleven_today'");
 $TodayRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_schedule where CAST(tgl_update as DATETIME) >= '$eleven_ystrdy' AND CAST(tgl_update as DATETIME) <= '$eleven_today'");
@@ -97,8 +340,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
             <div class="small-box bg-aqua">
                 <div class="inner">
                     <h3><?php
-                        $Qtytoday = sqlsrv_fetch_array($todayQty);
-                        echo number_format($Qtytoday['sumqty'], 2, ',', '.');
+                       echo number_format($rekap['Total_Berat_Hari_Ini'],2);
                         ?> Kg</h3>
                     <p>TOTAL BERAT PRODUKSI HARI INI</p>
                 </div>
@@ -106,7 +348,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                     <i class="fa fa-shopping-basket" aria-hidden="true"></i>
                 </div>
                 <a href="#" class="small-box-footer">
-                    <?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y') . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
+                    <?php echo date('d-F-Y') . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y', strtotime("+1 days")) . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
         </div>
@@ -116,8 +358,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
             <div class="small-box bg-green">
                 <div class="inner">
                     <h3><?php
-                        $RollToday = sqlsrv_fetch_array($TodayRoll);
-                        echo number_format($RollToday['sumrol'], 0, ',', '.');
+                       echo number_format($rekap['Total_Roll_Hari_Ini']);
                         ?> Rol</h3>
 
                     <p>TOTAL ROLL SELESAI HARI INI</p>
@@ -126,7 +367,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                     <i class="fa fa-sitemap" aria-hidden="true"></i>
                 </div>
                 <a href="#" class="small-box-footer">
-                    <?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y') . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
+                    <?php echo date('d-F-Y') . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y', strtotime("+1 days")) . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
         </div>
@@ -136,8 +377,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
             <div class="small-box bg-yellow">
                 <div class="inner">
                     <h3><?php
-                        $QtyYstrdy = sqlsrv_fetch_array($YstrdyQty);
-                        echo number_format($QtyYstrdy['sumqty'], 2, ',', '.');
+                        echo number_format($rekap['Total_Berat_Kemarin'],2);
                         ?> Kg</h3>
 
                     <p>TOTAL BERAT PRODUKSI KEMARIN</p>
@@ -146,7 +386,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                     <i class="fa fa-book" aria-hidden="true"></i>
                 </div>
                 <a href="#" class="small-box-footer">
-                    <?php echo date('d-F-Y', strtotime("-2 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
+                    <?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y') . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
         </div>
@@ -156,8 +396,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
             <div class="small-box bg-red">
                 <div class="inner">
                     <h3><?php
-                        $RollYstrdy = sqlsrv_fetch_array($YstrdyRoll);
-                        echo number_format($RollYstrdy['sumrol'], 0, ',', '.');
+                       echo number_format($rekap['Total_Roll_Kemarin']);
                         ?> Rol</h3>
                     <p>TOTAL ROLL SELESAI KEMARIN</p>
                 </div>
@@ -165,7 +404,7 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                     <i class="fa fa-yelp" aria-hidden="true"></i>
                 </div>
                 <a href="#" class="small-box-footer">
-                    <?php echo date('d-F-Y', strtotime("-2 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
+                    <?php echo date('d-F-Y', strtotime("-1 days")) . ' 07:00'; ?> <strong> &nbsp;&nbsp; S/D &nbsp;&nbsp; </strong> <?php echo  date('d-F-Y') . ' 07:00'; ?> <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
         </div>
@@ -366,10 +605,10 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
 
 
     <div class="row">
-        <div class="container col-md-6">
+        <div class="container col-md-4">
             <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-dashboard"></i> 10 Besar Operator Roll selesai <?php echo date('F Y') ?></h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Harian Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
@@ -379,57 +618,121 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
                                 <th>Operator</th>
                                 <th>Jumlah KK</th>
                                 <th>Jumlah Roll</th>
+                                <th>Jumlah Kg</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no = 1;
                             $monthNow = date('Y-m');
-                            $query_tenseries = sqlsrv_query($con,"SELECT TOP 10 pic_schedule, sum(rol) as rolf, count(nodemand) as nodemandf from db_ikg.tbl_schedule where [status] = 'selesai' and FORMAT(CAST(tgl_mulai AS DATE),'yyyy-MM') = '$monthNow' group by pic_schedule order by rolf desc");
-                            while ($ten = sqlsrv_fetch_array($query_tenseries)) {
                             ?>
+                            <?php foreach($summary_perday as $ten):?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo $ten['pic_schedule'] ?></td>
-                                    <td><?php echo $ten['nodemandf'] ?></td>
-                                    <td><?php echo $ten['rolf'] ?></td>
+                                    <td><?php echo $ten['Operator'] ?></td>
+                                    <td align="center"><?php echo $ten['Jumlah_Order'] ?></td>
+                                    <td align="center"><?php echo $ten['Total_Roll'] ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'],2) ?> Kg</td>
                                 </tr>
-                            <?php } ?>
+                            <?php endforeach;?>
                         </tbody>
                     </table>
                 </div>
                 <div class="box-footer clearfix no-border"></div>
             </div>
         </div>
-        <div class="container col-md-6">
-            <div class="box box-warning">
+        <div class="container col-md-4">
+            <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-sticky-note-o" aria-hidden="true"></i> 10 Besar Departemen Tujuan <?php echo date('F Y') ?></h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Harian Per Shift Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
                         <thead>
                             <tr class="bg-danger">
                                 <th>#</th>
-                                <th>Departemen</th>
-                                <th>Jumlah Roll</th>
+                                <th>Operator</th>
+                                <th>Shift</th>
                                 <th>Jumlah KK</th>
+                                <th>Jumlah Roll</th>
+                                <th>Jumlah Kg</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no = 1;
-                            $monthNow = date('Y-m');
-                            $query_tujuan = sqlsrv_query($con,"SELECT TOP 10 dept_tujuan, sum(rol) as rolf, count(nodemand) as nodemandf from db_ikg.tbl_schedule where [status] = 'selesai' and FORMAT(CAST(tgl_mulai as DATE),'yyyy-MM') = '$monthNow' group by dept_tujuan order by nodemandf desc");
-                            while ($tuj = sqlsrv_fetch_array($query_tujuan)) {
+                            $hariSekarang = date('N');
+
+                            if ($hariSekarang >= 1 && $hariSekarang <= 5):
+                                foreach ($summary_pershift as $ten):
                             ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo $tuj['dept_tujuan'] ?></td>
-                                    <td><?php echo $tuj['rolf'] ?></td>
-                                    <td><?php echo $tuj['nodemandf'] ?></td>
+                                    <td><?php echo $ten['Operator']; ?></td>
+                                    <td align="center"><?php echo $ten['Shift']; ?></td>
+                                    <td align="center"><?php echo $ten['Jumlah_Order']; ?></td>
+                                    <td align="center"><?php echo $ten['Total_Roll']; ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?> Kg</td>
                                 </tr>
-                            <?php } ?>
+                            <?php
+                                endforeach;
+                            else:
+                            ?>
+                                <tr>
+                                    <td colspan="6" align="center" style="color:red;font-weight:bold;">
+                                        Hanya Muncul Di Weekdays (Senin - Jumat)
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer clearfix no-border"></div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="box box-warning">
+                <div class="box-header ui-sortable-handle" style="cursor: move;">
+                    <h4><i class="fa fa-sticky-note-o" aria-hidden="true"></i> Output Harian Shift Tidak Full Operator Buka Kain <?php echo !empty($summary_perday[0]['Tanggal']) ? date('d F Y', strtotime($summary_perday[0]['Tanggal'])) : '' ?></h4>
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered" id="Table1">
+                        <thead>
+                            <tr class="bg-danger">
+                                <th>#</th>
+                                <th>Operator</th>
+                                <th>Shift</th>
+                                <th>Jumlah KK</th>
+                                <th>Jumlah Roll</th>
+                                <th>Jumlah Kg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $no = 1;
+                            $hariSekarang = date('N');
+
+                            if ($hariSekarang > 5):
+                                foreach($summary_tidakfull as $ten):
+                            ?>
+                                <tr>
+                                    <td><?php echo $no++; ?></td>
+                                    <td><?php echo $ten['Operator']; ?></td>
+                                    <td align="center"><?php echo $ten['Shift']; ?></td>
+                                    <td align="center"><?php echo $ten['Jumlah_Order']; ?></td>
+                                    <td align="right"><?php echo $ten['Total_Roll']; ?> Rol</td>
+                                    <td align="right"><?php echo number_format($ten['Total_Bagi_Kain'], 2); ?> Kg</td>
+                                </tr>
+                            <?php
+                                endforeach;
+                            else:
+                            ?>
+                                <tr>
+                                    <td colspan="6" align="center" style="color:red;font-weight:bold;">
+                                        Hanya Muncul Di Hari Sabtu
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -442,35 +745,73 @@ $YstrdyRoll = sqlsrv_query($con,"SELECT sum(rol) as sumrol from db_ikg.tbl_sched
         <div class="container col-md-6">
             <div class="box box-success">
                 <div class="box-header ui-sortable-handle" style="cursor: move;">
-                    <h4><i class="fa fa-dashboard"></i> Total Qty Schedule Belum Proses Per Tgl Input</h4>
+                    <h4><i class="fa fa-dashboard"></i> Output Bulanan Operator Buka Kain <?php echo date('F Y') ?></h4>
                 </div>
                 <div class="box-body">
                     <table class="table table-bordered" id="Table1">
                         <thead>
                             <tr class="bg-danger">
-                                <th>Tgl Masuk</th>
-                                <th>Jumlah KG</th>
+                                <th>#</th>
+                                <th>Operator</th>
+                                <th>Jumlah KK</th>
                                 <th>Jumlah Roll</th>
+                                <th>Jumlah Kg</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no = 1;
                             $monthNow = date('Y-m');
-                            $query_noproses = sqlsrv_query($con,"SELECT 
-                            a.tgl_masuk,
-                            sum(a.bruto) as jml_bruto,
-                            sum(a.rol) as jml_rol
-                            from db_ikg.tbl_schedule a
-                            where a.status ='antri mesin'
-                            group by 
-                            a.tgl_masuk");
-                            while ($np = sqlsrv_fetch_array($query_noproses)) {
+                           foreach($summary_perbulan as $np):
                             ?>
                                 <tr>
-                                    <td><?php echo cek($np['tgl_masuk'],'Y-m-d') ?></td>
-                                    <td><?php echo $np['jml_bruto'] ?></td>
-                                    <td><?php echo $np['jml_rol'] ?></td>
+                                    <td><?php echo $no++ ?></td>
+                                    <td><?php echo $np['Operator'] ?></td>
+                                    <td align='center'><?php echo $np['Jumlah_Order'] ?></td>
+                                    <td align='center'><?php echo $np['Total_Roll'] ?></td>
+                                    <td align='right'><?php echo number_format($np['Total_Bagi_Kain'],2) ?> Kg</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+        <div class="container col-md-6">
+            <div class="box box-success">
+                <div class="box-header ui-sortable-handle" style="cursor: move;">
+                    <h4><i class="fa fa-dashboard"></i> Jumlah Buka kain dan Belah kain </h4>
+
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered" id="Table1">
+                        <thead>
+                            <tr class="bg-danger">
+                                <th>Tanggal</th>
+                                <th>Jumlah KG</th>
+                                <!-- <th>Jumlah Roll</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $query_total_bukabelahkain = sqlsrv_query($con,"SELECT
+                                                                                TOP 12 date_laporan,
+                                                                                SUM(
+                                                                                    belah_kain_s1 + belah_kain_s2 + belah_kain_s3 + buka_kain_s1 + buka_kain_s2 + buka_kain_s3
+                                                                                ) AS total
+                                                                            FROM
+                                                                                db_ikg.tbl_laporanharian
+                                                                            GROUP BY
+                                                                                date_laporan
+                                                                            ORDER BY
+                                                                                date_laporan DESC;");
+                            while ($tb = sqlsrv_fetch_array($query_total_bukabelahkain)) {
+                            ?>
+                                <tr>
+                                    <td><?php echo cek($tb['date_laporan'],'Y-m-d') ?></td>
+                                    <td><?php echo $tb['total'] ?></td>
+
                                 </tr>
                             <?php } ?>
                         </tbody>
