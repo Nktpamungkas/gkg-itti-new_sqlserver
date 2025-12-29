@@ -10,7 +10,7 @@ date_default_timezone_set('Asia/Jakarta');
 // $con = mysqli_connect("10.0.0.10", "dit", "4dm1n", "db_ikg");
 //$con = mysqli_connect("localhost", "root", "", "db_ikg");
 // $connn = mysqli_connect("10.0.0.10", "dit", "4dm1n", "dbnow_gkg");
-$conr = mysqli_connect("10.0.0.10", "dit", "4dm1n", "dbnow_gerobak");
+// $conr = mysqli_connect("10.0.0.10", "dit", "4dm1n", "dbnow_gerobak");
 
 // Koneksi ke SQLSERVER
 $hostSVR19 = "10.0.0.221";
@@ -26,7 +26,7 @@ $dbnow_gerobak = array("Database" => $nowgerobak, "UID" => $usernameSVR19, "PWD"
 
 $con = sqlsrv_connect($hostSVR19, $db_ikg);
 $connn = sqlsrv_connect($hostSVR19, $dbnow_gkg);
-// $conr = sqlsrv_connect($hostSVR19, $dbnow_gerobak);
+$conr = sqlsrv_connect($hostSVR19, $dbnow_gerobak);
 if ($con) {
 } else {
     exit("SQLSVR19 db_ikg Connection failed");

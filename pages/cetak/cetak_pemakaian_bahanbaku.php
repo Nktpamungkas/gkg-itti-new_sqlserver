@@ -553,42 +553,46 @@ include("../../koneksi.php");
                     }
                     ?>
 
-
                     <?php
-                    // Assuming you have a connection to SQL Server established as $conr
-                
-                    $sqlgerobak = "SELECT DISTINCT
-                                                    no_demand,
-                                                    prod_order,
-                                                    bagi_kain,
-                                                    berat,
-                                                    berat_kosong,
-                                                    SUM(berat - berat_kosong) AS beratkain
-                                                FROM
-                                                    `kain_proses` 
-                                                WHERE
-                                                    prod_order ='$rowOut[PRODUCTIONORDERCODE]' 
-                                                AND 
-                                                    proses ='$rowOut[OPERATIONCODE]' 
-                                                AND 
-                                                    no_step ='$rowOut[STEPNUMBER]' ";
-                    $gerobak = mysqli_query($conr, $sqlgerobak);
-                    $beratkain = mysqli_fetch_assoc($gerobak);
+                        $sqlgerobak = " SELECT 
+                                            no_demand,
+                                            prod_order,
+                                            bagi_kain,
+                                            berat,
+                                            berat_kosong,
+                                            SUM(berat - berat_kosong) OVER() AS beratkain
+                                    FROM dbnow_gerobak.kain_proses
+                                    WHERE prod_order = '$rowOut[PRODUCTIONORDERCODE]'
+                                        AND proses     = '$rowOut[OPERATIONCODE]'
+                                        AND no_step    = '$rowOut[STEPNUMBER]' ";
+
+                        $gerobak = sqlsrv_query($conr, $sqlgerobak);
+
+                        if ($gerobak === false) {
+                            die("<pre>" . print_r(sqlsrv_errors(), true) . "</pre>");
+                        }
+
+                        $beratkain = sqlsrv_fetch_array($gerobak, SQLSRV_FETCH_ASSOC);
                     ?>
 
-
                     <?php
-                    $sqlgerobakselesai = "SELECT
-                                                GROUP_CONCAT(DISTINCT no_gerobak SEPARATOR ', ') AS gabungan_no_gerobak
-                                            FROM
-                                                kain_proses 
-                                            WHERE
-                                                prod_order = '$rowOut[PRODUCTIONORDERCODE]' 
-                                                AND proses='$rowOut[OPERATIONCODE]'
-                                                AND no_step='$rowOut[STEPNUMBER]'";
+                        $sqlgerobakselesai = " SELECT 
+                                                    STRING_AGG(no_gerobak, ', ') AS gabungan_no_gerobak
+                                            FROM (
+                                                    SELECT DISTINCT no_gerobak
+                                                    FROM dbnow_gerobak.kain_proses
+                                                    WHERE prod_order = '$rowOut[PRODUCTIONORDERCODE]'
+                                                    AND proses     = '$rowOut[OPERATIONCODE]'
+                                                    AND no_step    = '$rowOut[STEPNUMBER]'
+                                            ) AS x ";
 
-                    $gerobakss = mysqli_query($conr, $sqlgerobakselesai);
-                    $gerobakselesai = mysqli_fetch_assoc($gerobakss);
+                        $gerobakss = sqlsrv_query($conr, $sqlgerobakselesai);
+
+                        if ($gerobakss === false) {
+                            die("<pre>" . print_r(sqlsrv_errors(), true) . "</pre>");
+                        }
+
+                        $gerobakselesai = sqlsrv_fetch_array($gerobakss, SQLSRV_FETCH_ASSOC);
                     ?>
 
                     <td align="center" valign="top" colspan="2">
