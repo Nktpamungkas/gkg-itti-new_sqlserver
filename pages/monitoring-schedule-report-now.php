@@ -332,7 +332,7 @@ include "koneksi.php";
                                 OR x.OPERATIONCODE = 'BAT3' 
                                 OR x.OPERATIONCODE = 'BBS1' 
                                 OR x.OPERATIONCODE = 'JHP1' 
-                                OR x.OPERATIONCODE = 'WAIT36')
+                                OR x.OPERATIONCODE = 'WAIT36'
                             )
                             AND x.PROGRESSTEMPLATECODE = 'S01'
                             AND TIMESTAMP(
@@ -799,7 +799,7 @@ include "koneksi.php";
                                                                 AND a.CHARACTERISTICCODE = b.CHARACTERISTICCODE
                                                                 AND a.PRODUCTIONORDERCODE = b.QUALITYDOCPRODUCTIONORDERCODE
                                                             WHERE
-                                                                a.PRODUCTIONORDERCODE = '" . $rowdb21[' PRODUCTIONORDERCODE'] . "'
+                                                                a.PRODUCTIONORDERCODE = '" . $rowdb21['PRODUCTIONORDERCODE'] . "'
                                                                 AND (
                                                                     a.CHARACTERISTICCODE = 'GRB1'
                                                                         OR a.CHARACTERISTICCODE = 'GRB2'
